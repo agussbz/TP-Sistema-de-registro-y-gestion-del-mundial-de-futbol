@@ -53,7 +53,7 @@ BEGIN
         SET @mensajeError = 'El ID del idioma a modificar no existe. ';
 
     IF LTRIM(RTRIM(@nombre)) = ''
-        SET @mensajeError = @mensajeError + 'El nombre del Idioma no puede quedar vacío. ';
+        SET @mensajeError = @mensajeError + 'El nombre del Idioma no puede quedar vacï¿½o. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -134,7 +134,7 @@ BEGIN
         SET @mensajeError = 'El ID del anunciante a modificar no existe. ';
 
     IF LTRIM(RTRIM(@Pais)) = ''
-        SET @mensajeError = @mensajeError + 'El nombre del pais no puede quedar vacío. ';
+        SET @mensajeError = @mensajeError + 'El nombre del pais no puede quedar vacï¿½o. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -161,7 +161,7 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM publicidad.Anunciante WHERE AnuncianteID = @AnuncianteID)
         SET @mensajeError = 'El ID de la sede que intenta eliminar no existe. ';
 
-    IF EXISTS (SELECT 1 FROM publicidad.Campaña WHERE AnuncianteID = @AnuncianteID)
+    IF EXISTS (SELECT 1 FROM publicidad.Campaï¿½a WHERE AnuncianteID = @AnuncianteID)
         SET @mensajeError = @mensajeError + 'El ID del anunciante que intenta eliminar no es posible porque ya tiene anuncios programados. ';
 
     IF LEN(@mensajeError) > 0
@@ -220,10 +220,10 @@ BEGIN
         SET @mensajeError = 'El ID del arbitro a modificar no existe. ';
 
     IF LTRIM(RTRIM(@Pais)) = ''
-        SET @mensajeError = @mensajeError + 'El nombre del estadio no puede quedar vacío. ';
+        SET @mensajeError = @mensajeError + 'El nombre del estadio no puede quedar vacï¿½o. ';
 
     IF LTRIM(RTRIM(@RolArbitral)) = ''
-        SET @mensajeError = @mensajeError + 'El rol del arbitro no puede quedar vacío. ';
+        SET @mensajeError = @mensajeError + 'El rol del arbitro no puede quedar vacï¿½o. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
