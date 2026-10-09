@@ -651,7 +651,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE torneo.SP_Modificacion_Anunciante
+CREATE OR ALTER PROCEDURE publicidad.SP_Modificacion_Anunciante
     @AnuncianteID INT,
     @Pais VARCHAR(50)
 AS
@@ -680,7 +680,7 @@ END
 GO
 
 
-CREATE OR ALTER PROCEDURE torneo.SP_Baja_Anunciante
+CREATE OR ALTER PROCEDURE publicidad.SP_Baja_Anunciante
     @AnuncianteID INT
 AS
 BEGIN
@@ -690,7 +690,7 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM publicidad.Anunciante WHERE AnuncianteID = @AnuncianteID)
         SET @mensajeError = 'El ID de la sede que intenta eliminar no existe. ';
 
-    IF EXISTS (SELECT 1 FROM publicidad.Campa�a WHERE AnuncianteID = @AnuncianteID)
+    IF EXISTS (SELECT 1 FROM publicidad.Campaña WHERE AnuncianteID = @AnuncianteID)
         SET @mensajeError = @mensajeError + 'El ID del anunciante que intenta eliminar no es posible porque ya tiene anuncios programados. ';
 
     IF LEN(@mensajeError) > 0
@@ -710,12 +710,16 @@ GO
 -- PLANTILLA ABM: Tabla ARBITRO
 -- ====================================================================
 CREATE OR ALTER PROCEDURE reglamento.SP_Alta_Arbitro
+    @PersonaID INT,
     @Pais VARCHAR(50),
 	@RolArbitral VARCHAR(50)
 AS
 BEGIN
     SET NOCOUNT ON;
     DECLARE @mensajeError VARCHAR(MAX) = '';
+
+    IF @PersonaID IS NULL
+        SET @mensajeError = 'El id del arbitro no tiene que ser nulo.';
 
     IF LTRIM(RTRIM(@Pais)) = ''
         SET @mensajeError = 'El nombre del pais es obligatorio.';
@@ -736,7 +740,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE torneo.SP_Modificacion_Arbitro
+CREATE OR ALTER PROCEDURE reglamento.SP_Modificacion_Arbitro
     @PersonaID INT,
     @Pais VARCHAR(50),
 	@RolArbitral VARCHAR(50)
@@ -769,7 +773,7 @@ END
 GO
 
 
-CREATE OR ALTER PROCEDURE torneo.SP_Baja_Arbitro
+CREATE OR ALTER PROCEDURE reglamento.SP_Baja_Arbitro
     @PersonaID INT
 AS
 BEGIN
@@ -849,7 +853,7 @@ BEGIN
 
     PRINT 'Idioma hablado eliminado exitosamente.';
 END
-
+Go
 
 -- ====================================================================
 -- PLANTILLA ABM: Tabla Interes Publicitario
@@ -888,6 +892,7 @@ GO
 CREATE OR ALTER PROCEDURE publicidad.SP_Modificacion_InteresPublicitario
     @InteresID INT,
 	@AnuncianteID INT,
+    @PaisID INT,
     @Prioridad VARCHAR(50)
 AS
 BEGIN
@@ -898,6 +903,9 @@ BEGIN
         SET @mensajeError = 'El ID del anunciante a modificar no existe. ';
 
     IF NOT EXISTS (SELECT 1 FROM Publicidad.Anunciante WHERE AnuncianteID = @AnuncianteID)
+        SET @mensajeError = @mensajeError + 'El ID del anunciante a modificar no existe. ';
+
+    IF NOT EXISTS (SELECT 1 FROM torneo.Pais WHERE PaisID = @PaisID)
         SET @mensajeError = @mensajeError + 'El ID del anunciante a modificar no existe. ';
 
     IF LTRIM(RTRIM(@Prioridad)) = ''
@@ -938,6 +946,7 @@ BEGIN
 
     PRINT 'Interes publicitario eliminado exitosamente.';
 END
+Go
 
 -- ====================================================================
 -- PLANTILLA ABM: Tabla Gol
@@ -1054,7 +1063,7 @@ BEGIN
 
     PRINT 'Gol eliminado exitosamente.';
 END
-
+GO
 
 -- ====================================================================
 -- PLANTILLA ABM: Tabla Tarjeta Asignada
@@ -1163,7 +1172,7 @@ BEGIN
 
     PRINT 'Tarjeta asginada eliminada exitosamente.';
 END
-
+GO
 
 -- Pais
 
