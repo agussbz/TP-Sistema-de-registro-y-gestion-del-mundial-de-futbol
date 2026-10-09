@@ -2161,3 +2161,250 @@ BEGIN
     PRINT 'Pieza publicitaria eliminada exitosamente.';
 END
 GO
+
+-- ALTA SE DESIGNA ARBITRO
+CREATE OR ALTER PROCEDURE reglamento.SP_Alta_SeDesignaArbitro
+    @PartidoID INT,
+    @ArbitroID INT,
+    @Informe VARCHAR(50),
+    @RolArbitral VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @mensajeError VARCHAR(MAX) = '';
+
+    IF NOT EXISTS (
+        SELECT 1 FROM torneo.Partido
+        WHERE PartidoID = @PartidoID
+    )
+        SET @mensajeError = @mensajeError + 'El partido no existe. ';
+
+    IF NOT EXISTS (
+        SELECT 1 FROM reglamento.Arbitro
+        WHERE PersonaID = @ArbitroID
+    )
+        SET @mensajeError = @mensajeError + 'El arbitro no existe. ';
+
+    IF @Informe IS NULL OR LTRIM(RTRIM(@Informe)) = ''
+        SET @mensajeError = @mensajeError + 'El informe es obligatorio. ';
+
+    IF @RolArbitral IS NULL OR LTRIM(RTRIM(@RolArbitral)) = ''
+        SET @mensajeError = @mensajeError + 'El rol arbitral es obligatorio. ';
+
+    IF EXISTS (
+        SELECT 1 FROM reglamento.SeDesignaArbitro
+        WHERE PartidoID = @PartidoID
+          AND ArbitroID = @ArbitroID
+    )
+        SET @mensajeError = @mensajeError + 'El arbitro ya esta designado para este partido. ';
+
+    IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1);
+        RETURN;
+    END
+
+    INSERT INTO reglamento.SeDesignaArbitro
+        (PartidoID, ArbitroID, Informe, RolArbitral)
+    VALUES
+        (@PartidoID, @ArbitroID, @Informe, @RolArbitral);
+
+    PRINT 'Arbitro designado exitosamente.';
+END
+GO
+
+-- MODIFICACION SE DESIGNA ARBITRO
+CREATE OR ALTER PROCEDURE reglamento.SP_Modificacion_SeDesignaArbitro
+    @PartidoID INT,
+    @ArbitroID INT,
+    @Informe VARCHAR(50),
+    @RolArbitral VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @mensajeError VARCHAR(MAX) = '';
+
+    IF NOT EXISTS (
+        SELECT 1 FROM reglamento.SeDesignaArbitro
+        WHERE PartidoID = @PartidoID
+          AND ArbitroID = @ArbitroID
+    )
+        SET @mensajeError = @mensajeError + 'La designacion no existe. ';
+
+    IF @Informe IS NULL OR LTRIM(RTRIM(@Informe)) = ''
+        SET @mensajeError = @mensajeError + 'El informe es obligatorio. ';
+
+    IF @RolArbitral IS NULL OR LTRIM(RTRIM(@RolArbitral)) = ''
+        SET @mensajeError = @mensajeError + 'El rol arbitral es obligatorio. ';
+
+    IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1);
+        RETURN;
+    END
+
+    UPDATE reglamento.SeDesignaArbitro
+    SET Informe = @Informe,
+        RolArbitral = @RolArbitral
+    WHERE PartidoID = @PartidoID
+      AND ArbitroID = @ArbitroID;
+
+    PRINT 'Designacion de arbitro modificada exitosamente.';
+END
+GO
+
+-- BAJA SE DESIGNA ARBITRO
+CREATE OR ALTER PROCEDURE reglamento.SP_Baja_SeDesignaArbitro
+    @PartidoID INT,
+    @ArbitroID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @mensajeError VARCHAR(MAX) = '';
+
+    IF NOT EXISTS (
+        SELECT 1 FROM reglamento.SeDesignaArbitro
+        WHERE PartidoID = @PartidoID
+          AND ArbitroID = @ArbitroID
+    )
+        SET @mensajeError = @mensajeError + 'La designacion no existe. ';
+
+    IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1);
+        RETURN;
+    END
+
+    DELETE FROM reglamento.SeDesignaArbitro
+    WHERE PartidoID = @PartidoID
+      AND ArbitroID = @ArbitroID;
+
+    PRINT 'Designacion de arbitro eliminada exitosamente.';
+END
+GO
+
+-- ALTA EXHIBICION
+CREATE OR ALTER PROCEDURE publicidad.SP_Alta_Exhibicion
+    @Espacio VARCHAR(50),
+    @PiezaID INT,
+    @Costo INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @mensajeError VARCHAR(MAX) = '';
+
+    IF @Espacio IS NULL OR LTRIM(RTRIM(@Espacio)) = ''
+        SET @mensajeError = @mensajeError + 'El espacio es obligatorio. ';
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM publicidad.PiezaPublicitaria
+        WHERE PiezaID = @PiezaID
+    )
+        SET @mensajeError = @mensajeError + 'La pieza publicitaria no existe. ';
+
+    IF @Costo IS NULL OR @Costo < 0
+        SET @mensajeError = @mensajeError + 'El costo debe ser mayor o igual a cero. ';
+
+    IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1);
+        RETURN;
+    END
+
+    INSERT INTO publicidad.Exhibicion
+        (Espacio, PiezaID, Costo)
+    VALUES
+        (@Espacio, @PiezaID, @Costo);
+
+    PRINT 'Exhibicion registrada exitosamente.';
+END
+GO
+
+-- MODIFICACION EXHIBICION
+CREATE OR ALTER PROCEDURE publicidad.SP_Modificacion_Exhibicion
+    @ExhibicionID INT,
+    @Espacio VARCHAR(50),
+    @PiezaID INT,
+    @Costo INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @mensajeError VARCHAR(MAX) = '';
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM publicidad.Exhibicion
+        WHERE ExhibicionID = @ExhibicionID
+    )
+        SET @mensajeError = @mensajeError + 'La exhibicion no existe. ';
+
+    IF @Espacio IS NULL OR LTRIM(RTRIM(@Espacio)) = ''
+        SET @mensajeError = @mensajeError + 'El espacio es obligatorio. ';
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM publicidad.PiezaPublicitaria
+        WHERE PiezaID = @PiezaID
+    )
+        SET @mensajeError = @mensajeError + 'La pieza publicitaria no existe. ';
+
+    IF @Costo IS NULL OR @Costo < 0
+        SET @mensajeError = @mensajeError + 'El costo debe ser mayor o igual a cero. ';
+
+    IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1);
+        RETURN;
+    END
+
+    UPDATE publicidad.Exhibicion
+    SET Espacio = @Espacio,
+        PiezaID = @PiezaID,
+        Costo = @Costo
+    WHERE ExhibicionID = @ExhibicionID;
+
+    PRINT 'Exhibicion modificada exitosamente.';
+END
+GO
+
+-- BAJA EXHIBICION
+CREATE OR ALTER PROCEDURE publicidad.SP_Baja_Exhibicion
+    @ExhibicionID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @mensajeError VARCHAR(MAX) = '';
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM publicidad.Exhibicion
+        WHERE ExhibicionID = @ExhibicionID
+    )
+        SET @mensajeError = @mensajeError + 'La exhibicion no existe. ';
+
+    IF EXISTS (
+        SELECT 1
+        FROM publicidad.CuentaConExhibicion
+        WHERE ExhibicionID = @ExhibicionID
+    )
+        SET @mensajeError = @mensajeError + 'No se puede eliminar: La exhibicion esta asociada a un partido. ';
+
+    IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1);
+        RETURN;
+    END
+
+    DELETE FROM publicidad.Exhibicion
+    WHERE ExhibicionID = @ExhibicionID;
+
+    PRINT 'Exhibicion eliminada exitosamente.';
+END
+GO
