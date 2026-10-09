@@ -35,8 +35,8 @@ BEGIN
 END
 GO
 
-IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'reglas')
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'reglamento')
 BEGIN
-	EXEC('CREATE SCHEMA reglas')
+	EXEC('CREATE SCHEMA reglamento')
 END
 GO
