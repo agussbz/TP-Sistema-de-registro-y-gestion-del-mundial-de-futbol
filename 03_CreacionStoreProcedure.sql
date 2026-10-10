@@ -1279,9 +1279,6 @@ BEGIN
 	IF LTRIM(RTRIM(@tipo)) = ''
 		SET @mensajeError = @mensajeError + 'El tipo de la tarjeta es obligatorio. '
 
-    IF LTRIM(RTRIM(@tipo)) = ''
-        SET @mensajeError = @mensajeError + 'El tipo de tarjeta no puede quedar vacio. '
-
 	IF EXISTS (SELECT 1 FROM reglamento.Tarjeta WHERE Tipo = @tipo)
 		SET @mensajeError = @mensajeError + 'El tipo de tarjeta ya se encuentra registrado. '
 
