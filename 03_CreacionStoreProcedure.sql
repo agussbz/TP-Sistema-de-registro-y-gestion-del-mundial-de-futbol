@@ -1337,7 +1337,7 @@ BEGIN
 		SET @mensajeError = @mensajeError + 'La tarjeta no existe. '
 
 	IF EXISTS (SELECT 1 FROM reglamento.TarjetaAsignada WHERE TarjetaID = @TarjetaID)
-		SET @mensajeError = @mensajeError + 'No se puede eliminar. Hay partidos que ya la tienen registrada y jugadores que a las que se le asigno'
+		SET @mensajeError = @mensajeError + 'No se puede eliminar. Existen partidos que ya la tienen registrada. '
 
 	IF LEN(@mensajeError) > 0
     BEGIN
@@ -1398,6 +1398,8 @@ BEGIN
 	UPDATE torneo.Convocatoria
 	SET SeleccionID = @SeleccionID
 	WHERE ConvocatoriaID = @ConvocatoriaID
+
+    PRINT 'Convocatoria modificada exitosamente'
 END
 GO
 
@@ -1632,6 +1634,9 @@ BEGIN
 	IF LTRIM(RTRIM(@Fase)) = ''
 		SET @mensajeError = @mensajeError + 'La fase es obligatoria. '
 
+    IF EXISTS (SELECT 1 FROM torneo.Partido WHERE SedeID = @SedeID AND fechaHoraUTC = @FechaHoraUTC)
+        SET @mensajeError = @mensajeError + 'Ya existe un partido en esa sede en ese horario. '
+
 	IF LEN(@mensajeError) > 0
     BEGIN
         RAISERROR(@mensajeError, 16, 1);
@@ -1666,6 +1671,9 @@ BEGIN
 
 	IF LTRIM(RTRIM(@Fase)) = ''
 		SET @mensajeError = @mensajeError + 'La fase es obligatoria'
+
+    IF EXISTS (SELECT 1 FROM torneo.Partido WHERE SedeID = @SedeID AND fechaHoraUTC = @FechaHoraUTC)
+        SET @mensajeError = @mensajeError + 'Ya existe un partido en esa sede en ese horario. '
 
 	IF LEN(@mensajeError) > 0
     BEGIN
