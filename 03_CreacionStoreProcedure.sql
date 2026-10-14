@@ -10,6 +10,9 @@
 
 -- Objetivo: Creacion de Store Procedure
 
+USE DB_Mundial_2026
+GO
+
 --Sede
 
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Sede
@@ -76,7 +79,7 @@ BEGIN
         HusoHorario= @HusoHorario 
     WHERE SedeID= @SedeID;
 
-    PRINT 'Sede modificada exitosamente.';
+    PRINT 'Sede modificada exitosamente. ';
 END
 GO
 
@@ -115,11 +118,11 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF LTRIM(RTRIM(@Pais)) = ''
-        SET @mensajeError = 'El País es obligatorio.';
+        SET @mensajeError = 'El País es obligatorio. ';
     IF LTRIM(RTRIM(@Confederacion)) = ''
-        SET @mensajeError = @mensajeError + 'La Confederación es obligatoria.';
+        SET @mensajeError = @mensajeError + 'La Confederación es obligatoria. ';
     IF EXISTS (SELECT 1 FROM torneo.Seleccion WHERE Pais = @Pais)
-        SET @mensajeError = @mensajeError + 'Esta selección ya se encuentra registrada.';
+        SET @mensajeError = @mensajeError + 'Esta selección ya se encuentra registrada. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -130,7 +133,7 @@ BEGIN
     INSERT INTO torneo.Seleccion (Pais, Confederacion)
     VALUES (@Pais, @Confederacion);
 
-    PRINT 'Selección registrada exitosamente.';
+    PRINT 'Selección registrada exitosamente. ';
 END
 GO
 
@@ -144,11 +147,11 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF NOT EXISTS (SELECT 1 FROM torneo.Seleccion WHERE SeleccionID = @SeleccionID)
-        SET @mensajeError = 'La Selección no existe.';
+        SET @mensajeError = 'La Selección no existe. ';
     IF LTRIM(RTRIM(@Pais)) = ''
-        SET @mensajeError = @mensajeError + 'El País es obligatorio.';
+        SET @mensajeError = @mensajeError + 'El País es obligatorio. ';
     IF LTRIM(RTRIM(@Confederacion)) = ''
-        SET @mensajeError = @mensajeError + 'La Confederación es obligatoria.';
+        SET @mensajeError = @mensajeError + 'La Confederación es obligatoria. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -161,7 +164,7 @@ BEGIN
         Confederacion = @Confederacion 
     WHERE SeleccionID = @SeleccionID;
 
-    PRINT 'Selección modificada exitosamente.';
+    PRINT 'Selección modificada exitosamente. ';
 END
 GO
 
@@ -173,12 +176,12 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF NOT EXISTS (SELECT 1 FROM torneo.Seleccion WHERE SeleccionID = @SeleccionID)
-        SET @mensajeError = 'La Selección no existe.';
+        SET @mensajeError = 'La Selección no existe. ';
     
     IF EXISTS (SELECT 1 FROM torneo.Convocatoria WHERE SeleccionID = @SeleccionID)
-        SET @mensajeError = @mensajeError + 'No se puede borrar: Tiene convocatorias asociadas.';
+        SET @mensajeError = @mensajeError + 'No se puede borrar: Tiene convocatorias asociadas. ';
     IF EXISTS (SELECT 1 FROM torneo.Juega WHERE SeleccionID = @SeleccionID)
-        SET @mensajeError = @mensajeError + 'No se puede borrar: Tiene partidos asignados.';
+        SET @mensajeError = @mensajeError + 'No se puede borrar: Tiene partidos asignados. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -187,7 +190,7 @@ BEGIN
     END
 
     DELETE FROM torneo.Seleccion WHERE SeleccionID = @SeleccionID;
-    PRINT 'Selección eliminada exitosamente.';
+    PRINT 'Selección eliminada exitosamente. ';
 END
 GO
 
@@ -651,7 +654,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE torneo.SP_Modificacion_Anunciante
+CREATE OR ALTER PROCEDURE publicidad.SP_Modificacion_Anunciante
     @AnuncianteID INT,
     @Pais VARCHAR(50)
 AS
@@ -680,7 +683,7 @@ END
 GO
 
 
-CREATE OR ALTER PROCEDURE torneo.SP_Baja_Anunciante
+CREATE OR ALTER PROCEDURE publicidad.SP_Baja_Anunciante
     @AnuncianteID INT
 AS
 BEGIN
@@ -690,7 +693,7 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM publicidad.Anunciante WHERE AnuncianteID = @AnuncianteID)
         SET @mensajeError = 'El ID de la sede que intenta eliminar no existe. ';
 
-    IF EXISTS (SELECT 1 FROM publicidad.Campa�a WHERE AnuncianteID = @AnuncianteID)
+    IF EXISTS (SELECT 1 FROM publicidad.Campaña WHERE AnuncianteID = @AnuncianteID)
         SET @mensajeError = @mensajeError + 'El ID del anunciante que intenta eliminar no es posible porque ya tiene anuncios programados. ';
 
     IF LEN(@mensajeError) > 0
@@ -710,12 +713,16 @@ GO
 -- PLANTILLA ABM: Tabla ARBITRO
 -- ====================================================================
 CREATE OR ALTER PROCEDURE reglamento.SP_Alta_Arbitro
+    @PersonaID INT,
     @Pais VARCHAR(50),
 	@RolArbitral VARCHAR(50)
 AS
 BEGIN
     SET NOCOUNT ON;
     DECLARE @mensajeError VARCHAR(MAX) = '';
+
+    IF @PersonaID IS NULL
+        SET @mensajeError = 'El id del arbitro no tiene que ser nulo.';
 
     IF LTRIM(RTRIM(@Pais)) = ''
         SET @mensajeError = 'El nombre del pais es obligatorio.';
@@ -736,7 +743,7 @@ BEGIN
 END
 GO
 
-CREATE OR ALTER PROCEDURE torneo.SP_Modificacion_Arbitro
+CREATE OR ALTER PROCEDURE reglamento.SP_Modificacion_Arbitro
     @PersonaID INT,
     @Pais VARCHAR(50),
 	@RolArbitral VARCHAR(50)
@@ -769,7 +776,7 @@ END
 GO
 
 
-CREATE OR ALTER PROCEDURE torneo.SP_Baja_Arbitro
+CREATE OR ALTER PROCEDURE reglamento.SP_Baja_Arbitro
     @PersonaID INT
 AS
 BEGIN
@@ -849,7 +856,7 @@ BEGIN
 
     PRINT 'Idioma hablado eliminado exitosamente.';
 END
-
+Go
 
 -- ====================================================================
 -- PLANTILLA ABM: Tabla Interes Publicitario
@@ -888,6 +895,7 @@ GO
 CREATE OR ALTER PROCEDURE publicidad.SP_Modificacion_InteresPublicitario
     @InteresID INT,
 	@AnuncianteID INT,
+    @PaisID INT,
     @Prioridad VARCHAR(50)
 AS
 BEGIN
@@ -898,6 +906,9 @@ BEGIN
         SET @mensajeError = 'El ID del anunciante a modificar no existe. ';
 
     IF NOT EXISTS (SELECT 1 FROM Publicidad.Anunciante WHERE AnuncianteID = @AnuncianteID)
+        SET @mensajeError = @mensajeError + 'El ID del anunciante a modificar no existe. ';
+
+    IF NOT EXISTS (SELECT 1 FROM torneo.Pais WHERE PaisID = @PaisID)
         SET @mensajeError = @mensajeError + 'El ID del anunciante a modificar no existe. ';
 
     IF LTRIM(RTRIM(@Prioridad)) = ''
@@ -938,6 +949,7 @@ BEGIN
 
     PRINT 'Interes publicitario eliminado exitosamente.';
 END
+Go
 
 -- ====================================================================
 -- PLANTILLA ABM: Tabla Gol
@@ -1054,7 +1066,7 @@ BEGIN
 
     PRINT 'Gol eliminado exitosamente.';
 END
-
+GO
 
 -- ====================================================================
 -- PLANTILLA ABM: Tabla Tarjeta Asignada
@@ -1163,7 +1175,7 @@ BEGIN
 
     PRINT 'Tarjeta asginada eliminada exitosamente.';
 END
-
+GO
 
 -- Pais
 
@@ -1211,12 +1223,15 @@ BEGIN
 	IF LTRIM(RTRIM(@nombre)) = ''
 		SET @mensajeError = @mensajeError + 'El nombre del pais no debe estar vacio. '
 
+	IF EXISTS (SELECT 1 FROM torneo.Pais WHERE Nombre = @nombre AND PaisID <> @PaisID)
+		SET @mensajeError = @mensajeError + 'El nombre del pais ya se encuentra registrado. '
+
 	IF LEN(@mensajeError) > 0
 	BEGIN
 		RAISERROR(@mensajeError, 16, 1)
 		RETURN
 	END
-
+        
 	UPDATE Torneo.Pais
 	SET Nombre = @nombre,
 		PBI = @PBI,
@@ -1282,7 +1297,7 @@ GO
 
 CREATE OR ALTER PROCEDURE reglamento.SP_Modificacion_Tarjeta
 	@TarjetaID INT,
-	@tipo VARCHAR(50)
+	@tipo VARCHAR(30)
 AS
 BEGIN
 	SET NOCOUNT ON
@@ -1293,6 +1308,15 @@ BEGIN
 
 	IF LTRIM(RTRIM(@tipo)) = ''
 		SET @mensajeError = @mensajeError + 'El tipo de tarjeta no puede quedar vacio. '
+    
+    IF EXISTS (SELECT 1 FROM reglamento.Tarjeta WHERE Tipo = @tipo AND TarjetaID <> @TarjetaID)
+		SET @mensajeError = @mensajeError + 'El tipo de tarjeta ya se encuentra registrado. '
+	
+    IF LEN(@mensajeError) > 0
+	BEGIN
+		RAISERROR (@mensajeError, 16, 1)
+		RETURN
+	END
 
 	UPDATE reglamento.Tarjeta
 	SET Tipo = @tipo
@@ -1385,7 +1409,10 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
 	IF NOT EXISTS (SELECT 1 FROM torneo.Convocatoria WHERE ConvocatoriaID = @ConvocatoriaID)
-		SET @mensajeError = @mensajeError + 'La convocatoria no existe'
+		SET @mensajeError = @mensajeError + 'La convocatoria no existe. '
+
+    IF EXISTS (SELECT 1 FROM torneo.Jugador WHERE ConvocatoriaID = @ConvocatoriaID)
+		SET @mensajeError = @mensajeError + 'No se puede eliminar porque tiene jugadores asociados. '
     
 	IF LEN(@mensajeError) > 0
     BEGIN
@@ -1410,13 +1437,13 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = ''
 
 	IF NOT EXISTS (SELECT 1 FROM torneo.Persona WHERE PersonaID = @PersonaID)
-		SET @mensajeError = @mensajeError + 'La persona no existe.'
+		SET @mensajeError = @mensajeError + 'La persona no existe. '
 
 	IF NOT EXISTS (SELECT 1 FROM torneo.Seleccion WHERE SeleccionID = @SeleccionID)
 		SET @mensajeError = @mensajeError + 'La seleccion no existe. '
 
-	IF EXISTS (SELECT 1 FROM torneo.CuerpoTecnico WHERE PersonaID = @PersonaID AND SeleccionID = @SeleccionID)
-		SET @mensajeError = @mensajeError + 'La persona ya esta asignada a esa seleccion. '
+	IF EXISTS (SELECT 1 FROM torneo.CuerpoTecnico WHERE PersonaID = @PersonaID)
+		SET @mensajeError = @mensajeError + 'La persona ya pertenece a un cuerpo tecnico. '
 
 	IF LTRIM(RTRIM(@rol)) = ''
 		SET @mensajeError = @mensajeError + 'El rol es obligatorio. '
@@ -1445,13 +1472,13 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = ''
 
 	IF NOT EXISTS (SELECT 1 FROM torneo.Persona WHERE PersonaID = @PersonaID)
-		SET @mensajeError = @mensajeError + 'La persona no existe.'
+		SET @mensajeError = @mensajeError + 'La persona no existe. '
 
 	IF NOT EXISTS (SELECT 1 FROM torneo.Seleccion WHERE SeleccionID = @SeleccionAnterior)
 		SET @mensajeError = @mensajeError + 'La seleccion original no existe. '
 
 	IF NOT EXISTS (SELECT 1 FROM torneo.CuerpoTecnico WHERE PersonaID = @PersonaID AND SeleccionID = @SeleccionAnterior)
-		SET @mensajeError = @mensajeError + 'No existe esa persona asignada a la seleccion original'
+		SET @mensajeError = @mensajeError + 'No existe esa persona asignada a la seleccion original. '
 
 	IF NOT EXISTS (SELECT 1 FROM torneo.Seleccion WHERE SeleccionID = @SeleccionID)
 		SET @mensajeError = @mensajeError + 'La seleccion nueva no existe. '
@@ -1493,7 +1520,8 @@ BEGIN
         RETURN;
     END
 
-	DELETE FROM torneo.CuerpoTecnico WHERE PersonaID = @PersonaID
+	DELETE FROM torneo.CuerpoTecnico 
+    WHERE PersonaID = @PersonaID
 
 	PRINT 'Cuerpo Tecnico eliminado exitosamente'
 END
@@ -1501,9 +1529,331 @@ GO
 
 -- Campaña
 
+CREATE OR ALTER PROCEDURE publicidad.SP_Alta_Campaña
+	@nombre VARCHAR(30),
+	@fechaInicio DATE,
+	@AnuncianteID INT
+AS
+BEGIN
+    SET NOCOUNT ON
+    DECLARE @mensajeError VARCHAR(MAX) = ''
+
+	IF LTRIM(RTRIM(@nombre)) = ''
+		SET @mensajeError = @mensajeError + 'El nombre es obligatorio. '
+
+	IF NOT EXISTS (SELECT 1 FROM publicidad.Anunciante WHERE AnuncianteID = @AnuncianteID)
+		SET @mensajeError = @mensajeError + 'El anunciate no existe. '
+
+    IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1);
+        RETURN;
+    END
+
+	INSERT INTO publicidad.Campaña (Nombre, FechaInicio, AnuncianteID)
+	VALUES (@nombre, @fechaInicio, @AnuncianteID)
+
+	PRINT 'Campaña registrada exitosamente'
+END
+GO
+
+CREATE OR ALTER PROCEDURE publicidad.SP_Modificacion_Campaña
+	@CampañaID INT, 
+	@Nombre VARCHAR(30),
+	@fechaInicio DATE,
+	@AnuncianteID INT
+AS
+BEGIN
+    SET NOCOUNT ON
+    DECLARE @mensajeError VARCHAR(MAX) = ''
+
+	IF NOT EXISTS (SELECT 1 FROM publicidad.Campaña WHERE CampañaID = @CampañaID)
+		SET @mensajeError = @mensajeError + 'La campaña no existe. '
+
+	IF LTRIM(RTRIM(@nombre)) = ''
+		SET @mensajeError = @mensajeError + 'El nombre es obligatorio. '
+
+	IF NOT EXISTS (SELECT 1 FROM publicidad.Anunciante WHERE AnuncianteID = @AnuncianteID)
+		SET @mensajeError = @mensajeError + 'El anunciante no existe'
+
+    IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1);
+        RETURN;
+    END
+
+	UPDATE publicidad.Campaña
+	SET Nombre = @Nombre, FechaInicio = @fechaInicio, AnuncianteID = @AnuncianteID
+	WHERE CampañaID = @CampañaID
+END
+GO
+
+CREATE OR ALTER PROCEDURE publicidad.SP_Baja_Campaña
+	@CampañaID INT
+AS
+BEGIN
+    SET NOCOUNT ON
+    DECLARE @mensajeError VARCHAR(MAX) = ''
+
+	IF NOT EXISTS (SELECT 1 FROM publicidad.Campaña WHERE CampañaID = @CampañaID)
+		SET @mensajeError = @mensajeError + 'La campaña no existe. '
+
+	IF EXISTS (SELECT 1 FROM publicidad.PiezaPublicitaria WHERE CampañaID = @CampañaID)
+		SET @mensajeError = @mensajeError + 'No se puede eliminar porque cuenta con una pieza publicitaria asociada'
+    
+	IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1);
+        RETURN;
+    END
+	
+	DELETE publicidad.Campaña WHERE CampañaID = @CampañaID
+	PRINT 'Campaña eliminada exitosamente'
+END
+GO
+
 -- Partido
 
--- Sustiticion (Cruza partido y 2 jugadores)
+CREATE OR ALTER PROCEDURE torneo.SP_Alta_Partido
+	@SedeID INT,
+	@Fase VARCHAR(50),
+	@Asistencia INT,
+	@ResultadoFinal VARCHAR(20),
+	@FechaHoraLocal DATETIME,
+	@FechaHoraUTC DATETIME
+AS
+BEGIN
+    SET NOCOUNT ON
+    DECLARE @mensajeError VARCHAR(MAX) = ''
+
+	IF NOT EXISTS (SELECT 1 FROM torneo.Sede WHERE SedeID = @SedeID)
+		SET @mensajeError = @mensajeError + 'La sede no existe. '
+
+	IF LTRIM(RTRIM(@Fase)) = ''
+		SET @mensajeError = @mensajeError + 'La fase es obligatoria. '
+
+	IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1);
+        RETURN;
+    END
+
+	INSERT INTO torneo.Partido (SedeID, Fase, Asistencia, ResultadoFinal, FechaHoraLocal, FechaHoraUTC)
+	VALUES (@SedeID, @Fase, @Asistencia, @ResultadoFinal, @FechaHoraLocal, @FechaHoraUTC)
+
+    PRINT 'Partido registrado exitosamente'
+END
+GO
+
+CREATE OR ALTER PROCEDURE torneo.SP_Modificacion_Partido
+	@PartidoID INT,
+	@SedeID INT,
+	@Fase VARCHAR(50),
+	@Asistencia INT,
+	@ResultadoFinal VARCHAR(20),
+	@fechaHoraLocal DATETIME,
+	@fechaHoraUTC DATETIME
+AS
+BEGIN
+	SET NOCOUNT ON
+    DECLARE @mensajeError VARCHAR(MAX) = ''
+
+	IF NOT EXISTS (SELECT 1 FROM torneo.Partido WHERE PartidoID = @PartidoID)
+		SET @mensajeError = @mensajeError + 'El partido no existe. '
+
+	IF NOT EXISTS (SELECT 1 FROM torneo.Sede WHERE SedeID = @SedeID)
+		SET @mensajeError = @mensajeError + 'La sede no existe. '
+
+	IF LTRIM(RTRIM(@Fase)) = ''
+		SET @mensajeError = @mensajeError + 'La fase es obligatoria'
+
+	IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1);
+        RETURN;
+    END
+
+	UPDATE torneo.Partido
+	SET SedeID = @SedeID, Fase = @Fase, Asistencia = @Asistencia, ResultadoFinal = @ResultadoFinal, fechaHoraLocal = @fechaHoraLocal, fechaHoraUTC = @fechaHoraUTC
+	WHERE PartidoID = @PartidoID
+
+    PRINT 'Partido modificado exitosamente'
+END
+GO
+
+CREATE OR ALTER PROCEDURE torneo.SP_Baja_Partido
+	@PartidoID INT
+AS
+BEGIN
+	SET NOCOUNT ON
+	DECLARE @mensajeError VARCHAR(MAX) = ''
+
+	IF NOT EXISTS (SELECT 1 FROM torneo.Partido WHERE PartidoID = @PartidoID)
+		SET @mensajeError = @mensajeError + 'El partido no existe. '
+
+	IF EXISTS (SELECT 1 FROM torneo.Juega WHERE PartidoID = @PartidoID)
+		SET @mensajeError = @mensajeError + 'No se puede eliminar porque tiene selecciones asociadas. '
+
+	IF EXISTS (SELECT 1 FROM torneo.TieneFormacion WHERE PartidoID = @PartidoID)
+		SET @mensajeError = @mensajeError + 'No se puede eliminar porque tiene formaciones asociadas. '
+
+	IF EXISTS (SELECT 1 FROM publicidad.CuentaConExhibicion WHERE PartidoID = @PartidoID)
+		SET @mensajeError = @mensajeError + 'No se puede eliminar porque tiene exhibiciones asociadas. '
+
+	IF EXISTS (SELECT 1 FROM torneo.Gol WHERE PartidoID = @PartidoID)
+		SET @mensajeError = @mensajeError + 'No se puede eliminar porque tiene goles asociados. '
+
+	IF EXISTS (SELECT 1 FROM torneo.Sustitucion WHERE PartidoID = @PartidoID)
+		SET @mensajeError = @mensajeError + 'No se puede eliminar porque tiene sustituciones asociadas. '
+
+	IF EXISTS (SELECT 1 FROM reglamento.TarjetaAsignada WHERE PartidoID = @PartidoID)
+		SET @mensajeError = @mensajeError + 'No se puede eliminar porque tiene tarjetas asignadas. '
+
+	IF EXISTS (SELECT 1 FROM reglamento.SeDesignaArbitro WHERE PartidoID = @PartidoID)
+		SET @mensajeError = @mensajeError + 'No se puede eliminar porque tiene arbitros designados. '
+
+	IF LEN(@mensajeError) > 0
+	BEGIN
+		RAISERROR(@mensajeError, 16, 1);
+		RETURN;
+	END
+
+	DELETE torneo.Partido WHERE PartidoID = @PartidoID
+	PRINT 'Partido eliminado exitosamente'
+END
+GO
+
+-- Sustiticion 
+
+CREATE OR ALTER PROCEDURE torneo.SP_Alta_Sustitucion
+	@PartidoID INT,
+	@JugadorSaleID INT,
+	@JugadorEntraID INT,
+	@NumeroVentana INT,
+	@Minuto INT,
+	@Motivo VARCHAR(20)
+AS
+BEGIN
+	SET NOCOUNT ON
+	DECLARE @mensajeError VARCHAR(MAX) = ''
+
+	IF NOT EXISTS (SELECT 1 FROM torneo.Partido WHERE PartidoID = @PartidoID)
+		SET @mensajeError = @mensajeError + 'El partido no existe. '
+
+	IF NOT EXISTS (SELECT 1 FROM torneo.Jugador WHERE PersonaID = @JugadorEntraID)
+		SET @mensajeError = @mensajeError + 'El jugador que entra no existe. '
+
+	IF NOT EXISTS (SELECT 1 FROM torneo.Jugador WHERE PersonaID = @JugadorSaleID)
+		SET @mensajeError = @mensajeError + 'El jugador que sale no existe. '
+
+	IF @JugadorEntraID = @JugadorSaleID
+		SET @mensajeError = @mensajeError + 'Los jugadores no pueden ser los mismos. '
+
+	IF @NumeroVentana <= 0
+		SET @mensajeError = @mensajeError + 'El numero de ventana debe ser mayor que cero. '
+
+	IF @Minuto < 0
+		SET @mensajeError = @mensajeError + 'El minuto no puede ser negativo. '
+
+    IF LTRIM(RTRIM(@Motivo)) = ''
+	    SET @mensajeError = @mensajeError + 'El motivo no puede estar vacio. '
+    
+    IF @Motivo NOT IN ('Tactico', 'Lesion', 'Precaucion')
+	    SET @mensajeError = @mensajeError + 'El motivo debe ser Tactico, Lesion o Precaucion. '
+
+    IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1)
+        RETURN
+    END
+
+	INSERT INTO torneo.Sustitucion (PartidoID, JugadorSaleID, JugadorEntraID, NumeroVentana, Minuto, Motivo)
+	VALUES (@PartidoID, @JugadorSaleID, @JugadorEntraID, @NumeroVentana, @Minuto, @Motivo)
+
+	PRINT 'Sustitucion registrada exitosamente'
+END
+GO
+
+CREATE OR ALTER PROCEDURE torneo.SP_Modificacion_Sustitucion
+	@SustitucionID INT,
+	@PartidoID INT,
+	@JugadorSaleID INT,
+	@JugadorEntraID INT,
+	@NumeroVentana INT,
+	@Minuto INT,
+	@Motivo VARCHAR(20)
+AS
+BEGIN
+	SET NOCOUNT ON
+	DECLARE @mensajeError VARCHAR(MAX) = ''
+
+	IF NOT EXISTS (SELECT 1 FROM torneo.Sustitucion WHERE SustitucionID = @SustitucionID)
+		SET @mensajeError = @mensajeError + 'La sustitucion no existe. '
+
+	IF NOT EXISTS (SELECT 1 FROM torneo.Partido WHERE PartidoID = @PartidoID)
+		SET @mensajeError = @mensajeError + 'El partido no existe. '
+
+	IF NOT EXISTS (SELECT 1 FROM torneo.Jugador WHERE PersonaID = @JugadorEntraID)
+		SET @mensajeError = @mensajeError + 'El jugador que entra no existe. '
+
+	IF NOT EXISTS (SELECT 1 FROM torneo.Jugador WHERE PersonaID = @JugadorSaleID)
+		SET @mensajeError = @mensajeError + 'El jugador que sale no existe. '
+
+	IF @JugadorEntraID = @JugadorSaleID
+		SET @mensajeError = @mensajeError + 'Los jugadores no pueden ser los mismos. '
+
+	IF @NumeroVentana <= 0
+		SET @mensajeError = @mensajeError + 'El numero de ventana debe ser mayor que cero. '
+
+	IF @Minuto < 0
+		SET @mensajeError = @mensajeError + 'El minuto no puede ser negativo. '
+
+	IF LTRIM(RTRIM(@motivo)) = ''
+		SET @mensajeError = @mensajeError + 'El motivo no puede estar vacio. '
+
+    IF @Motivo NOT IN ('Tactico', 'Lesion', 'Precaucion')
+	    SET @mensajeError = @mensajeError + 'El motivo debe ser Tactico, Lesion o Precaucion. '
+
+    IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1)
+        RETURN
+    END
+
+	UPDATE torneo.Sustitucion
+    SET PartidoID = @PartidoID, JugadorSaleID = @JugadorSaleID, JugadorEntraID = @JugadorEntraID,
+    NumeroVentana = @NumeroVentana, Minuto = @Minuto, Motivo = @Motivo
+    WHERE SustitucionID = @SustitucionID
+
+	PRINT 'Sustitucion modificada exitosamente'
+END
+GO
+
+CREATE OR ALTER PROCEDURE torneo.SP_Baja_Sustitucion
+    @SustitucionID INT
+AS
+BEGIN
+    SET NOCOUNT ON
+    DECLARE @mensajeError VARCHAR(MAX) = ''
+
+    IF NOT EXISTS (
+        SELECT 1 FROM torneo.Sustitucion
+        WHERE SustitucionID = @SustitucionID
+    )
+        SET @mensajeError = @mensajeError + 'La sustitucion no existe. '
+
+    IF LEN(@mensajeError) > 0
+    BEGIN
+        RAISERROR(@mensajeError, 16, 1)
+        RETURN
+    END
+
+    DELETE FROM torneo.Sustitucion
+    WHERE SustitucionID = @SustitucionID
+
+    PRINT 'Sustitucion eliminada exitosamente.'
+END
+GO
 
 -- ALTA PERSONA
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Persona
