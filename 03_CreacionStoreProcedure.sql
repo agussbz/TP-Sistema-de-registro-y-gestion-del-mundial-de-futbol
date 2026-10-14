@@ -79,7 +79,7 @@ BEGIN
         HusoHorario= @HusoHorario 
     WHERE SedeID= @SedeID;
 
-    PRINT 'Sede modificada exitosamente.';
+    PRINT 'Sede modificada exitosamente. ';
 END
 GO
 
@@ -118,11 +118,11 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF LTRIM(RTRIM(@Pais)) = ''
-        SET @mensajeError = 'El País es obligatorio.';
+        SET @mensajeError = 'El País es obligatorio. ';
     IF LTRIM(RTRIM(@Confederacion)) = ''
-        SET @mensajeError = @mensajeError + 'La Confederación es obligatoria.';
+        SET @mensajeError = @mensajeError + 'La Confederación es obligatoria. ';
     IF EXISTS (SELECT 1 FROM torneo.Seleccion WHERE Pais = @Pais)
-        SET @mensajeError = @mensajeError + 'Esta selección ya se encuentra registrada.';
+        SET @mensajeError = @mensajeError + 'Esta selección ya se encuentra registrada. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -133,7 +133,7 @@ BEGIN
     INSERT INTO torneo.Seleccion (Pais, Confederacion)
     VALUES (@Pais, @Confederacion);
 
-    PRINT 'Selección registrada exitosamente.';
+    PRINT 'Selección registrada exitosamente. ';
 END
 GO
 
@@ -147,11 +147,11 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF NOT EXISTS (SELECT 1 FROM torneo.Seleccion WHERE SeleccionID = @SeleccionID)
-        SET @mensajeError = 'La Selección no existe.';
+        SET @mensajeError = 'La Selección no existe. ';
     IF LTRIM(RTRIM(@Pais)) = ''
-        SET @mensajeError = @mensajeError + 'El País es obligatorio.';
+        SET @mensajeError = @mensajeError + 'El País es obligatorio. ';
     IF LTRIM(RTRIM(@Confederacion)) = ''
-        SET @mensajeError = @mensajeError + 'La Confederación es obligatoria.';
+        SET @mensajeError = @mensajeError + 'La Confederación es obligatoria. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -164,7 +164,7 @@ BEGIN
         Confederacion = @Confederacion 
     WHERE SeleccionID = @SeleccionID;
 
-    PRINT 'Selección modificada exitosamente.';
+    PRINT 'Selección modificada exitosamente. ';
 END
 GO
 
@@ -176,12 +176,12 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF NOT EXISTS (SELECT 1 FROM torneo.Seleccion WHERE SeleccionID = @SeleccionID)
-        SET @mensajeError = 'La Selección no existe.';
+        SET @mensajeError = 'La Selección no existe. ';
     
     IF EXISTS (SELECT 1 FROM torneo.Convocatoria WHERE SeleccionID = @SeleccionID)
-        SET @mensajeError = @mensajeError + 'No se puede borrar: Tiene convocatorias asociadas.';
+        SET @mensajeError = @mensajeError + 'No se puede borrar: Tiene convocatorias asociadas. ';
     IF EXISTS (SELECT 1 FROM torneo.Juega WHERE SeleccionID = @SeleccionID)
-        SET @mensajeError = @mensajeError + 'No se puede borrar: Tiene partidos asignados.';
+        SET @mensajeError = @mensajeError + 'No se puede borrar: Tiene partidos asignados. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -190,7 +190,7 @@ BEGIN
     END
 
     DELETE FROM torneo.Seleccion WHERE SeleccionID = @SeleccionID;
-    PRINT 'Selección eliminada exitosamente.';
+    PRINT 'Selección eliminada exitosamente. ';
 END
 GO
 
