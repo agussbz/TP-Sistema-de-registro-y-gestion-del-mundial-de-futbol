@@ -752,8 +752,8 @@ BEGIN
         RETURN;
     END
 
-    INSERT INTO reglamento.Arbitro (Pais, RolArbitral)
-    VALUES (@Pais, @RolArbitral);
+    INSERT INTO reglamento.Arbitro (PersonaID, Pais, RolArbitral)
+    VALUES (@PersonaID, @Pais, @RolArbitral);
 
     PRINT 'Arbitro registrada exitosamente.';
 END
@@ -1701,7 +1701,7 @@ BEGIN
 	IF LTRIM(RTRIM(@Fase)) = ''
 		SET @mensajeError = @mensajeError + 'La fase es obligatoria'
 
-    IF EXISTS (SELECT 1 FROM torneo.Partido WHERE SedeID = @SedeID AND fechaHoraUTC = @FechaHoraUTC)
+    IF EXISTS (SELECT 1 FROM torneo.Partido WHERE SedeID = @SedeID AND fechaHoraUTC = @fechaHoraUTC AND PartidoID <> @PartidoID)
         SET @mensajeError = @mensajeError + 'Ya existe un partido en esa sede en ese horario. '
 
 	IF LEN(@mensajeError) > 0
