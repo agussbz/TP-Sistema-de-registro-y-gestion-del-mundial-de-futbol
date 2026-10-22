@@ -13,7 +13,9 @@
 USE DB_Mundial_2026
 GO
 
---Sede
+-- ==========================
+-- PLANTILLA ABM: Tabla SEDE
+-- ==========================
 
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Sede
     @NombreEstadio VARCHAR(70),
@@ -59,11 +61,11 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF NOT EXISTS (SELECT 1 FROM torneo.Sede WHERE SedeID = @SedeID)
-        SET @mensajeError = 'La Sede no existe.';
+        SET @mensajeError = 'La Sede no existe. ';
     IF LTRIM(RTRIM(@NombreEstadio)) = ''
-        SET @mensajeError =  @mensajeError + 'El nombre del estadio es obligatorio.';
+        SET @mensajeError =  @mensajeError + 'El nombre del estadio es obligatorio. ';
     IF @Capacidad <= 0
-        SET @mensajeError =  @mensajeError + 'La capacidad debe ser mayor a cero.';
+        SET @mensajeError =  @mensajeError + 'La capacidad debe ser mayor a cero. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -107,7 +109,9 @@ BEGIN
 END
 GO
 
---Seleccion
+-- ===============================
+-- PLANTILLA ABM: Tabla SELECCION
+-- ===============================
 
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Seleccion
     @Pais VARCHAR(50),
@@ -133,7 +137,7 @@ BEGIN
     INSERT INTO torneo.Seleccion (Pais, Confederacion)
     VALUES (@Pais, @Confederacion);
 
-    PRINT 'Selección registrada exitosamente. ';
+    PRINT 'Selección registrada exitosamente.';
 END
 GO
 
@@ -164,7 +168,7 @@ BEGIN
         Confederacion = @Confederacion 
     WHERE SeleccionID = @SeleccionID;
 
-    PRINT 'Selección modificada exitosamente. ';
+    PRINT 'Selección modificada exitosamente.';
 END
 GO
 
@@ -190,11 +194,13 @@ BEGIN
     END
 
     DELETE FROM torneo.Seleccion WHERE SeleccionID = @SeleccionID;
-    PRINT 'Selección eliminada exitosamente. ';
+    PRINT 'Selección eliminada exitosamente.';
 END
 GO
 
--- Sancion
+-- =============================
+-- PLANTILLA ABM: Tabla SANCION
+-- =============================
 
 CREATE OR ALTER PROCEDURE reglamento.SP_Alta_Sancion
     @Descripcion VARCHAR(50),
@@ -273,7 +279,9 @@ BEGIN
 END
 GO
 
---Juega
+-- ============================
+-- PLANTILLA ABM: Tabla JUEGA
+-- ============================
 
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Juega
     @PartidoID INT,
@@ -284,11 +292,11 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF NOT EXISTS (SELECT 1 FROM torneo.Partido WHERE PartidoID = @PartidoID)
-        SET @mensajeError = 'El Partido no existe.';
+        SET @mensajeError = 'El Partido no existe. ';
     IF NOT EXISTS (SELECT 1 FROM torneo.Seleccion WHERE SeleccionID = @SeleccionID)
-        SET @mensajeError = @mensajeError + 'La Selección no existe.';
+        SET @mensajeError = @mensajeError + 'La Selección no existe. ';
     IF EXISTS (SELECT 1 FROM torneo.Juega WHERE PartidoID = @PartidoID AND SeleccionID = @SeleccionID)
-        SET @mensajeError = @mensajeError + 'La selección ya está asignada a este partido.';
+        SET @mensajeError = @mensajeError + 'La selección ya está asignada a este partido. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -325,7 +333,9 @@ BEGIN
 END
 GO
 
---CuentaConExhibicion
+-- ===========================================
+-- PLANTILLA ABM: Tabla CUENTA CON EXHIBICION
+-- ===========================================
 
 CREATE OR ALTER PROCEDURE publicidad.SP_Alta_CuentaConExhibicion
     @ExhibicionID INT,
@@ -336,11 +346,11 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF NOT EXISTS (SELECT 1 FROM publicidad.Exhibicion WHERE ExhibicionID = @ExhibicionID)
-        SET @mensajeError = 'La Exhibición no existe.';
+        SET @mensajeError = 'La Exhibición no existe. ';
     IF NOT EXISTS (SELECT 1 FROM torneo.Partido WHERE PartidoID = @PartidoID)
-        SET @mensajeError = @mensajeError + 'El Partido no existe.';
+        SET @mensajeError = @mensajeError + 'El Partido no existe. ';
     IF EXISTS (SELECT 1 FROM publicidad.CuentaConExhibicion WHERE ExhibicionID = @ExhibicionID AND PartidoID = @PartidoID)
-        SET @mensajeError = @mensajeError + 'Esta exhibición ya está asignada a este partido.';
+        SET @mensajeError = @mensajeError + 'Esta exhibición ya está asignada a este partido. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -377,7 +387,9 @@ BEGIN
 END
 GO
 
---Participa
+-- ===============================
+-- PLANTILLA ABM: Tabla PARTICIPA
+-- ===============================
 
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Participa
     @FormacionID INT,
@@ -462,7 +474,9 @@ BEGIN
 END
 GO
 
---Suspension
+-- ================================
+-- PLANTILLA ABM: Tabla SUSPENSION
+-- ================================
 
 CREATE OR ALTER PROCEDURE reglamento.SP_Alta_Suspension
     @PersonaID INT,
@@ -544,9 +558,10 @@ BEGIN
 END
 GO
 
--- ====================================================================
+-- ============================
 -- PLANTILLA ABM: Tabla IDIOMA
--- ====================================================================
+-- ============================
+
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Idioma
     @nombre VARCHAR(50)
 AS
@@ -585,7 +600,7 @@ BEGIN
         SET @mensajeError = 'El ID del idioma a modificar no existe. ';
 
     IF LTRIM(RTRIM(@nombre)) = ''
-        SET @mensajeError = @mensajeError + 'El nombre del Idioma no puede quedar vac�o. ';
+        SET @mensajeError = @mensajeError + 'El nombre del Idioma no puede quedar vacio. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -610,7 +625,7 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF NOT EXISTS (SELECT 1 FROM Torneo.Idioma WHERE IdiomaID = @IdiomaID)
-        SET @mensajeError = 'El ID de la sede que intenta eliminar no existe.';
+        SET @mensajeError = 'El ID de la sede que intenta eliminar no existe. ';
 
     IF EXISTS (SELECT 1 FROM Torneo.PersonaHabla WHERE IdiomaID = @IdiomaID)
         SET @mensajeError = @mensajeError + 'No se puede eliminar el idioma porque hay personas que lo hablan. ';
@@ -627,10 +642,10 @@ BEGIN
 END
 GO
 
-
--- ====================================================================
+-- ================================
 -- PLANTILLA ABM: Tabla ANUNCIANTE
--- ====================================================================
+-- ================================
+
 CREATE OR ALTER PROCEDURE publicidad.SP_Alta_Anunciante
     @Pais VARCHAR(50)
 AS
@@ -639,7 +654,7 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF LTRIM(RTRIM(@Pais)) = ''
-        SET @mensajeError = 'El nombre del pais es obligatorio.';
+        SET @mensajeError = 'El nombre del pais es obligatorio. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -650,7 +665,7 @@ BEGIN
     INSERT INTO publicidad.Anunciante (Pais)
     VALUES (@Pais);
 
-    PRINT 'Anunciante registrada exitosamente.';
+    PRINT 'Anunciante registrado exitosamente.';
 END
 GO
 
@@ -666,7 +681,7 @@ BEGIN
         SET @mensajeError = 'El ID del anunciante a modificar no existe. ';
 
     IF LTRIM(RTRIM(@Pais)) = ''
-        SET @mensajeError = @mensajeError + 'El nombre del pais no puede quedar vac�o. ';
+        SET @mensajeError = @mensajeError + 'El nombre del pais no puede quedar vacio. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -709,9 +724,10 @@ END
 GO
 
 
--- ====================================================================
+-- =============================
 -- PLANTILLA ABM: Tabla ARBITRO
--- ====================================================================
+-- =============================
+
 CREATE OR ALTER PROCEDURE reglamento.SP_Alta_Arbitro
     @PersonaID INT,
     @Pais VARCHAR(50),
@@ -722,13 +738,13 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF @PersonaID IS NULL
-        SET @mensajeError = 'El id del arbitro no tiene que ser nulo.';
+        SET @mensajeError = 'El id del arbitro no tiene que ser nulo. ';
 
     IF LTRIM(RTRIM(@Pais)) = ''
-        SET @mensajeError = 'El nombre del pais es obligatorio.';
+        SET @mensajeError = 'El nombre del pais es obligatorio. ';
 
     IF LTRIM(RTRIM(@RolArbitral)) = ''
-        SET @mensajeError = @mensajeError + 'El rol del arbitro es obligatorio.';
+        SET @mensajeError = @mensajeError + 'El rol del arbitro es obligatorio. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -756,10 +772,10 @@ BEGIN
         SET @mensajeError = 'El ID del arbitro a modificar no existe. ';
 
     IF LTRIM(RTRIM(@Pais)) = ''
-        SET @mensajeError = @mensajeError + 'El nombre del estadio no puede quedar vac�o. ';
+        SET @mensajeError = @mensajeError + 'El nombre del estadio no puede quedar vacio. ';
 
     IF LTRIM(RTRIM(@RolArbitral)) = ''
-        SET @mensajeError = @mensajeError + 'El rol del arbitro no puede quedar vac�o. ';
+        SET @mensajeError = @mensajeError + 'El rol del arbitro no puede quedar vacio. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -771,7 +787,7 @@ BEGIN
     SET Pais = @Pais, RolArbitral = @RolArbitral
     WHERE PersonaID = @PersonaID;
 
-    PRINT 'Arbitro modificada exitosamente.';
+    PRINT 'Arbitro modificada exitosamente. ';
 END
 GO
 
@@ -798,9 +814,10 @@ BEGIN
 END
 GO
 
--- ====================================================================
--- PLANTILLA ABM: Tabla PersonaHabla
--- ====================================================================
+-- ===================================
+-- PLANTILLA ABM: Tabla PERSONA HABLA
+-- ===================================
+
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_PersonaHabla
     @PersonaID INT,
 	@IdiomaID INT
@@ -810,13 +827,13 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF NOT EXISTS (SELECT 1 FROM torneo.Persona WHERE PersonaID = @PersonaID)
-        SET @mensajeError = 'La persona no existe.';
+        SET @mensajeError = 'La persona no existe. ';
 
     IF NOT EXISTS (SELECT 1 FROM torneo.Idioma WHERE IdiomaID = @IdiomaID)
-        SET @mensajeError = @mensajeError + 'El idioma no existe.';
+        SET @mensajeError = @mensajeError + 'El idioma no existe. ';
 
     IF EXISTS (SELECT 1 FROM torneo.PersonaHabla WHERE PersonaID = @PersonaID AND IdiomaID = @IdiomaID)
-        SET @mensajeError = @mensajeError + 'La persona ya habla este idioma.';
+        SET @mensajeError = @mensajeError + 'La persona ya habla este idioma. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -840,10 +857,10 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF NOT EXISTS (SELECT 1 FROM torneo.Persona WHERE PersonaID = @PersonaID)
-        SET @mensajeError = 'La persona no existe.';
+        SET @mensajeError = 'La persona no existe. ';
 
     IF NOT EXISTS (SELECT 1 FROM torneo.Idioma WHERE IdiomaID = @IdiomaID)
-        SET @mensajeError = @mensajeError + 'El idioma no existe.';
+        SET @mensajeError = @mensajeError + 'El idioma no existe. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -858,9 +875,10 @@ BEGIN
 END
 Go
 
--- ====================================================================
--- PLANTILLA ABM: Tabla Interes Publicitario
--- ====================================================================
+-- ==========================================
+-- PLANTILLA ABM: Tabla INTERES PUBLICITARIO
+-- ==========================================
+
 CREATE OR ALTER PROCEDURE publicidad.SP_Alta_InteresPublicitario
 	@AnuncianteID INT,
     @PaisID INT,
@@ -871,13 +889,13 @@ BEGIN
     DECLARE @mensajeError VARCHAR(MAX) = '';
 
     IF NOT EXISTS (SELECT 1 FROM Publicidad.Anunciante WHERE AnuncianteID = @AnuncianteID)
-        SET @mensajeError = 'El ID del anunciante a modificar no existe. ';
+        SET @mensajeError = 'El ID del anunciante no existe. ';
 
     IF NOT EXISTS (SELECT 1 FROM torneo.Pais WHERE PaisID = @PaisID)
-        SET @mensajeError = 'El ID del pais a modificar no existe. ';
+        SET @mensajeError = 'El ID del pais no existe. ';
 
     IF LTRIM(RTRIM(@Prioridad)) = ''
-        SET @mensajeError = @mensajeError + 'La descripcion de la prioridad es obligatorio.';
+        SET @mensajeError = @mensajeError + 'La descripcion de la prioridad es obligatorio. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -912,7 +930,7 @@ BEGIN
         SET @mensajeError = @mensajeError + 'El ID del anunciante a modificar no existe. ';
 
     IF LTRIM(RTRIM(@Prioridad)) = ''
-        SET @mensajeError = @mensajeError + 'La descripcion de la prioridad es obligatorio.';
+        SET @mensajeError = @mensajeError + 'La descripcion de la prioridad es obligatorio. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -951,9 +969,10 @@ BEGIN
 END
 Go
 
--- ====================================================================
--- PLANTILLA ABM: Tabla Gol
--- ====================================================================
+-- =========================
+-- PLANTILLA ABM: Tabla GOL
+-- =========================
+
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Gol
     @PartidoID INT,
     @PersonaID INT,
@@ -977,7 +996,7 @@ BEGIN
 
     IF LTRIM(RTRIM(@Periodo)) = ''
         SET @mensajeError = @mensajeError + 'El periodo es obligatorio.';
-
+         
     IF LTRIM(RTRIM(@Tipo)) = ''
         SET @mensajeError = @mensajeError + 'El tipo es obligatorio.';
 
@@ -1023,13 +1042,13 @@ BEGIN
         SET @mensajeError = @mensajeError + 'El ID del jugador asistente a modificar no existe. ';
 
     IF LTRIM(RTRIM(@Periodo)) = ''
-        SET @mensajeError = @mensajeError + 'El periodo no puede estar vacio.';
+        SET @mensajeError = @mensajeError + 'El periodo no puede estar vacio. ';
 
     IF LTRIM(RTRIM(@Tipo)) = ''
-        SET @mensajeError = @mensajeError + 'El tipo no puede estar vacio.';
+        SET @mensajeError = @mensajeError + 'El tipo no puede estar vacio. ';
 
     IF @Minuto IS NULL
-        SET @mensajeError = @mensajeError + 'El minuto no puede ser nulo';
+        SET @mensajeError = @mensajeError + 'El minuto no puede ser nulo ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -1068,9 +1087,10 @@ BEGIN
 END
 GO
 
--- ====================================================================
--- PLANTILLA ABM: Tabla Tarjeta Asignada
--- ====================================================================
+-- ======================================
+-- PLANTILLA ABM: Tabla TARJETA ASIGNADA
+-- ======================================
+
 CREATE OR ALTER PROCEDURE reglamento.SP_Alta_TarjetaAsignada
     @TarjetaID INT,
     @PartidoID INT,
@@ -1092,10 +1112,10 @@ BEGIN
         SET @mensajeError = @mensajeError + 'El ID de de la persona a modificar no existe. ';
 
     IF @Minuto IS NULL OR @Minuto < 0
-        SET @mensajeError = @mensajeError + 'El minuto no puede ser nulo o negativo.';
+        SET @mensajeError = @mensajeError + 'El minuto no puede ser nulo o negativo. ';
 
     IF LTRIM(RTRIM(@Motivo)) = ''
-        SET @mensajeError = @mensajeError + 'El motivo es obligatorio.';
+        SET @mensajeError = @mensajeError + 'El motivo es obligatorio. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -1177,7 +1197,9 @@ BEGIN
 END
 GO
 
--- Pais
+-- ==========================
+-- PLANTILLA ABM: Tabla PAIS
+-- ==========================
 
 CREATE OR ALTER PROCEDURE Torneo.SP_Alta_Pais
 	@nombre VARCHAR(50),
@@ -1267,7 +1289,9 @@ BEGIN
 END
 GO
 
--- Tarjeta
+-- =============================
+-- PLANTILLA ABM: Tabla TARJETA
+-- =============================
 
 CREATE OR ALTER PROCEDURE reglamento.SP_Alta_Tarjeta
 	@tipo VARCHAR(30)
@@ -1350,7 +1374,9 @@ BEGIN
 END
 GO
 
--- Convocatoria
+-- ==================================
+-- PLANTILLA ABM: Tabla CONVOCATORIA
+-- ==================================
 
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Convocatoria
 	@SeleccionID INT
@@ -1412,9 +1438,6 @@ BEGIN
 
 	IF NOT EXISTS (SELECT 1 FROM torneo.Convocatoria WHERE ConvocatoriaID = @ConvocatoriaID)
 		SET @mensajeError = @mensajeError + 'La convocatoria no existe. '
-
-    IF EXISTS (SELECT 1 FROM torneo.Jugador WHERE ConvocatoriaID = @ConvocatoriaID)
-		SET @mensajeError = @mensajeError + 'No se puede eliminar porque tiene jugadores asociados. '
     
 	IF LEN(@mensajeError) > 0
     BEGIN
@@ -1427,7 +1450,9 @@ BEGIN
 END
 GO
 
--- Cuerpo Tecnico
+-- ====================================
+-- PLANTILLA ABM: Tabla CUERPO TECNICO
+-- ====================================
 
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_CuerpoTecnico
 	@PersonaID INT,
@@ -1529,7 +1554,9 @@ BEGIN
 END
 GO
 
--- Campaña
+-- =============================
+-- PLANTILLA ABM: Tabla CAMPAÑA
+-- =============================
 
 CREATE OR ALTER PROCEDURE publicidad.SP_Alta_Campaña
 	@nombre VARCHAR(30),
@@ -1601,7 +1628,7 @@ BEGIN
 		SET @mensajeError = @mensajeError + 'La campaña no existe. '
 
 	IF EXISTS (SELECT 1 FROM publicidad.PiezaPublicitaria WHERE CampañaID = @CampañaID)
-		SET @mensajeError = @mensajeError + 'No se puede eliminar porque cuenta con una pieza publicitaria asociada'
+		SET @mensajeError = @mensajeError + 'No se puede eliminar porque cuenta con una pieza publicitaria asociada. '
     
 	IF LEN(@mensajeError) > 0
     BEGIN
@@ -1614,7 +1641,9 @@ BEGIN
 END
 GO
 
--- Partido
+-- =============================
+-- PLANTILLA ABM: Tabla PARTIDO
+-- =============================
 
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Partido
 	@SedeID INT,
@@ -1731,7 +1760,9 @@ BEGIN
 END
 GO
 
--- Sustiticion 
+-- =================================
+-- PLANTILLA ABM: Tabla SUSTITUCION
+-- =================================
 
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Sustitucion
 	@PartidoID INT,
@@ -1863,7 +1894,10 @@ BEGIN
 END
 GO
 
--- ALTA PERSONA
+-- =============================
+-- PLANTILLA ABM: Tabla PERSONA
+-- =============================
+
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Persona
     @Nombre VARCHAR(50),
     @Apellido VARCHAR(50),
@@ -1899,7 +1933,6 @@ BEGIN
 END
 GO
 
--- MODIFICACION PERSONA
 CREATE OR ALTER PROCEDURE torneo.SP_Modificacion_Persona
     @PersonaID INT,
     @Nombre VARCHAR(50),
@@ -1942,7 +1975,6 @@ BEGIN
 END
 GO
 
--- BAJA PERSONA
 CREATE OR ALTER PROCEDURE torneo.SP_Baja_Persona
     @PersonaID INT
 AS
@@ -1979,7 +2011,11 @@ BEGIN
 END
 GO
 
--- ALTA FORMACION
+
+-- ===============================
+-- PLANTILLA ABM: Tabla FORMACION
+-- ===============================
+
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Formacion
     @EsquemaTactico VARCHAR(50)
 AS
@@ -2004,7 +2040,6 @@ BEGIN
 END
 GO
 
--- MODIFICACION FORMACION
 CREATE OR ALTER PROCEDURE torneo.SP_Modificacion_Formacion
     @FormacionID INT,
     @EsquemaTactico VARCHAR(50)
@@ -2038,7 +2073,6 @@ BEGIN
 END
 GO
 
--- BAJA FORMACION
 CREATE OR ALTER PROCEDURE torneo.SP_Baja_Formacion
     @FormacionID INT
 AS
@@ -2081,7 +2115,10 @@ BEGIN
 END
 GO
 
--- ALTA JUGADOR
+-- =============================
+-- PLANTILLA ABM: Tabla JUGADOR
+-- =============================
+
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Jugador
     @PersonaID INT,
     @ClubOrigen VARCHAR(50),
@@ -2143,7 +2180,6 @@ BEGIN
 END
 GO
 
--- MODIFICACION JUGADOR
 CREATE OR ALTER PROCEDURE torneo.SP_Modificacion_Jugador
     @PersonaID INT,
     @ClubOrigen VARCHAR(50),
@@ -2202,7 +2238,6 @@ BEGIN
 END
 GO
 
--- BAJA JUGADOR
 CREATE OR ALTER PROCEDURE torneo.SP_Baja_Jugador
     @PersonaID INT
 AS
@@ -2262,7 +2297,10 @@ BEGIN
 END
 GO
 
--- ALTA TIENE FORMACION
+-- =====================================
+-- PLANTILLA ABM: Tabla TIENE FORMACION
+-- =====================================
+
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_TieneFormacion
     @PartidoID INT,
     @FormacionID INT
@@ -2304,7 +2342,6 @@ BEGIN
 END
 GO
 
--- MODIFICACION TIENE FORMACION
 CREATE OR ALTER PROCEDURE torneo.SP_Modificacion_TieneFormacion
     @PartidoID INT,
     @FormacionID INT,
@@ -2362,7 +2399,6 @@ BEGIN
 END
 GO
 
--- BAJA TIENE FORMACION
 CREATE OR ALTER PROCEDURE torneo.SP_Baja_TieneFormacion
     @PartidoID INT,
     @FormacionID INT
@@ -2393,7 +2429,10 @@ BEGIN
 END
 GO
 
--- ALTA PIEZA PUBLICITARIA
+-- ========================================
+-- PLANTILLA ABM: Tabla PIEZA PUBLICITARIA
+-- ========================================
+
 CREATE OR ALTER PROCEDURE publicidad.SP_Alta_PiezaPublicitaria
     @Contenido VARCHAR(50),
     @Tarifa DECIMAL(10,2),
@@ -2435,7 +2474,6 @@ BEGIN
 END
 GO
 
--- MODIFICACION PIEZA PUBLICITARIA
 CREATE OR ALTER PROCEDURE publicidad.SP_Modificacion_PiezaPublicitaria
     @PiezaID INT,
     @Contenido VARCHAR(50),
@@ -2486,7 +2524,6 @@ BEGIN
 END
 GO
 
--- BAJA PIEZA PUBLICITARIA
 CREATE OR ALTER PROCEDURE publicidad.SP_Baja_PiezaPublicitaria
     @PiezaID INT
 AS
@@ -2520,7 +2557,10 @@ BEGIN
 END
 GO
 
--- ALTA SE DESIGNA ARBITRO
+-- ========================================
+-- PLANTILLA ABM: Tabla SE DESIGNA ARBITRO
+-- ========================================
+
 CREATE OR ALTER PROCEDURE reglamento.SP_Alta_SeDesignaArbitro
     @PartidoID INT,
     @ArbitroID INT,
@@ -2572,7 +2612,6 @@ BEGIN
 END
 GO
 
--- MODIFICACION SE DESIGNA ARBITRO
 CREATE OR ALTER PROCEDURE reglamento.SP_Modificacion_SeDesignaArbitro
     @PartidoID INT,
     @ArbitroID INT,
@@ -2613,7 +2652,6 @@ BEGIN
 END
 GO
 
--- BAJA SE DESIGNA ARBITRO
 CREATE OR ALTER PROCEDURE reglamento.SP_Baja_SeDesignaArbitro
     @PartidoID INT,
     @ArbitroID INT
@@ -2644,7 +2682,10 @@ BEGIN
 END
 GO
 
--- ALTA EXHIBICION
+-- ================================
+-- PLANTILLA ABM: Tabla EXHIBICION
+-- ================================
+
 CREATE OR ALTER PROCEDURE publicidad.SP_Alta_Exhibicion
     @Espacio VARCHAR(50),
     @PiezaID INT,
@@ -2683,7 +2724,6 @@ BEGIN
 END
 GO
 
--- MODIFICACION EXHIBICION
 CREATE OR ALTER PROCEDURE publicidad.SP_Modificacion_Exhibicion
     @ExhibicionID INT,
     @Espacio VARCHAR(50),
@@ -2731,7 +2771,6 @@ BEGIN
 END
 GO
 
--- BAJA EXHIBICION
 CREATE OR ALTER PROCEDURE publicidad.SP_Baja_Exhibicion
     @ExhibicionID INT
 AS
