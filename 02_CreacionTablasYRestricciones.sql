@@ -450,7 +450,7 @@ BEGIN
         InteresID INT identity (1, 1) NOT NULL,
         Prioridad VARCHAR(50) NOT NULL,
         AnuncianteID INT NOT NULL,
-        PaisID INT NOT NULL,
+        PaisID INT NOT NULL
 
         CONSTRAINT PK_InteresPublicitario PRIMARY KEY CLUSTERED (InteresID),
         CONSTRAINT FK_InteresPublicitario_Anunciante FOREIGN KEY (AnuncianteID) REFERENCES Publicidad.Anunciante (AnuncianteID),
