@@ -919,3 +919,26 @@ SELECT Anio, Referee, AssistantReferees, FourthOfficial, ReserveFifthOfficial, V
 FROM torneo.FinalesArbitrosCompleto
 ORDER BY Anio ASC;
 GO
+
+
+-- ==================================================
+-- API: Transformación Moneda
+-- ==================================================
+DECLARE @Resultado DECIMAL(18,2);
+
+EXEC publicidad.ConvertirMonedaAUSD
+    @Monto = 15370.10, 
+    @MonedaOrigen = 'ARS', 
+    @MontoConvertido = @Resultado OUTPUT;
+
+PRINT CONCAT('Monto convertido a USD: ', @Resultado);
+GO
+
+DECLARE @Resultado2 DECIMAL(18,2);
+EXEC publicidad.ConvertirMonedaAUSD
+    @Monto = 10.0, 
+    @MonedaOrigen = 'EUR', 
+    @MontoConvertido = @Resultado2 OUTPUT;
+
+PRINT CONCAT('Monto convertido a USD: ', @Resultado2);
+GO

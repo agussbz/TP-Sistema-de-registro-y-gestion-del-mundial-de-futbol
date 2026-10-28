@@ -12,32 +12,6 @@
 USE DB_Mundial_2026
 GO
 
--- ======================
--- Transformación Moneda
--- ======================
-
-CREATE OR ALTER FUNCTION publicidad.Funcion_ConvertirMonedaAUSD (
-    @Monto DECIMAL(18,2),
-    @MonedaOrigen VARCHAR(10)
-)
-RETURNS DECIMAL(10,2)
-AS
-BEGIN
-    DECLARE @Factor DECIMAL(10,4) = CASE UPPER(LTRIM(RTRIM(@MonedaOrigen)))
-        WHEN 'USD' THEN 1.0000
-        WHEN 'EUR' THEN 1.0800
-        WHEN 'GBP' THEN 1.2700
-        WHEN 'MXN' THEN 0.0550
-        WHEN 'CAD' THEN 0.7300
-        WHEN 'ARS' THEN 0.0010
-        WHEN 'BRL' THEN 0.1900
-        ELSE 1.0000
-    END;
-
-    RETURN ROUND(@Monto * @Factor, 2);
-END
-GO
-
 -- ==================================================
 -- IMPORTACIÓN CSV Árbitros Históricos (referees.csv)
 -- ==================================================
@@ -574,3 +548,75 @@ BEGIN
     END CATCH;
 END;
 GO
+
+
+-- ==================================================
+-- API: Transformación Moneda
+-- ==================================================
+CREATE OR ALTER PROCEDURE publicidad.ConvertirMonedaAUSD
+    @Monto DECIMAL(18,2),
+    @MonedaOrigen VARCHAR(10),
+    @MontoConvertido DECIMAL(18,2) OUTPUT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF UPPER(LTRIM(RTRIM(@MonedaOrigen))) = 'USD'
+    BEGIN
+        SET @MontoConvertido = @Monto;
+        RETURN;
+    END;
+
+    DECLARE @Object INT;
+    DECLARE @URL VARCHAR(500) = 'https://api.frankfurter.dev/v2/rates?base=usd';
+    DECLARE @JsonTable TABLE (RespuestaJSON NVARCHAR(MAX));
+    DECLARE @JsonData NVARCHAR(MAX);
+    DECLARE @TasaCambio DECIMAL(18,6);
+    DECLARE @ErrorMensaje VARCHAR(4000);
+
+    BEGIN TRY
+        EXEC sp_OACreate 'MSXML2.ServerXMLHttp.6.0', @Object OUT;
+        EXEC sp_OAMethod @Object, 'OPEN', NULL, 'GET', @URL, 'FALSE';
+        EXEC sp_OAMethod @Object, 'setRequestHeader', NULL, 'User-Agent', 'Mozilla/5.0';
+        EXEC sp_OAMethod @Object, 'SEND';
+
+        INSERT INTO @JsonTable
+        EXEC sp_OAGetProperty @Object, 'RESPONSETEXT';
+
+        EXEC sp_OADestroy @Object;
+
+        SELECT @JsonData = RespuestaJSON FROM @JsonTable;
+
+        IF @JsonData IS NULL OR LEN(@JsonData) = 0
+        BEGIN
+            THROW 50001, 'No se pudo obtener respuesta de la API de tipos de cambio.', 1;
+        END;
+
+        SELECT @TasaCambio = rate
+        FROM OPENJSON(@JsonData)
+        WITH (
+            quote VARCHAR(10) '$.quote',
+            rate DECIMAL(18,6) '$.rate'
+        )
+        WHERE quote = UPPER(LTRIM(RTRIM(@MonedaOrigen)));
+
+        IF @TasaCambio IS NULL OR @TasaCambio = 0
+        BEGIN
+            THROW 50002, 'No se encontró la tasa de cambio para la moneda solicitada en la API.', 1;
+        END;
+
+        SET @MontoConvertido = ROUND(@Monto / @TasaCambio, 2);
+
+    END TRY
+    BEGIN CATCH
+        IF @Object IS NOT NULL 
+            EXEC sp_OADestroy @Object;
+
+        SET @ErrorMensaje = ERROR_MESSAGE();
+        THROW 50003, @ErrorMensaje, 1;
+    END CATCH;
+END;
+GO
+
+
+
