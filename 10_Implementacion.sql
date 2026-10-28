@@ -61,6 +61,7 @@ SELECT * FROM Publicidad.CuentaConExhibicion;
 GO
 
 -- Paso 2: cargo datos validos a las tablas
+
 -- =============================================================
 -- SEDE
 -- =============================================================
@@ -363,6 +364,9 @@ ORDER BY p.PartidoID, ex.Espacio;
 
 -- Paso 4: Probar las SP de las reglas de negocio
 
+-- =============================================================
+-- torneo.SP_RegistrarPartidoCompleto
+-- =============================================================
 DECLARE
     @SedeID int, @LocalID int, @VisitanteID int, @Capacidad int,
     @PartidoID int, @FechaUTC datetime, @FechaLocal datetime,
@@ -371,11 +375,6 @@ DECLARE
     @JugadorSaleID int, @JugadorEntraID int, @TarjetaID int,
     @ArbitroID int, @PaisArbitro varchar(50),
     @PiezaPartidoID int, @AsistenciaPrueba int;
-
-
--- =============================================================
--- torneo.SP_RegistrarPartidoCompleto
--- =============================================================
 PRINT '--- 1. SP_RegistrarPartidoCompleto ---';
 
 SELECT TOP (1) @SedeID = SedeID, @Capacidad = Capacidad
@@ -415,7 +414,7 @@ BEGIN TRY
     PRINT 'FALLO DE PRUEBA: se esperaba que el partido con sede inexistente fuera rechazado.';
 END TRY
 BEGIN CATCH
-    PRINT 'FALLIDO esperado (sede inexistente): ' + ERROR_MESSAGE();
+    PRINT 'FALLO esperado (sede inexistente): ' + ERROR_MESSAGE();
 END CATCH;
 
 IF @SedeID IS NOT NULL AND @LocalID IS NOT NULL
@@ -428,7 +427,7 @@ BEGIN
         PRINT 'FALLO DE PRUEBA: se esperaba rechazar una selección contra sí misma.';
     END TRY
     BEGIN CATCH
-        PRINT 'FALLIDO esperado (selección contra sí misma): ' + ERROR_MESSAGE();
+        PRINT 'FALLO esperado (selección contra sí misma): ' + ERROR_MESSAGE();
     END CATCH;
 END;
 
@@ -484,7 +483,7 @@ BEGIN TRY
     PRINT 'FALLO DE PRUEBA: se esperaba rechazar jugador/convocatoria inexistentes.';
 END TRY
 BEGIN CATCH
-    PRINT 'FALLIDO esperado (jugador no pertenece a convocatoria): ' + ERROR_MESSAGE();
+    PRINT 'FALLO esperado (jugador no pertenece a convocatoria): ' + ERROR_MESSAGE();
 END CATCH;
 
 -- El mismo dorsal ya existente debe rechazarse; el jugador elegido pertenece a esa convocatoria.
@@ -502,7 +501,7 @@ BEGIN
         PRINT 'FALLO DE PRUEBA: se esperaba rechazar dorsal duplicado (si no se rechazó antes por otra regla, revisar datos).';
     END TRY
     BEGIN CATCH
-        PRINT 'FALLIDO esperado (reemplazo inválido/dorsal duplicado): ' + ERROR_MESSAGE();
+        PRINT 'FALLO esperado (reemplazo inválido/dorsal duplicado): ' + ERROR_MESSAGE();
     END CATCH;
 END;
 
@@ -552,7 +551,7 @@ BEGIN TRY
     PRINT 'FALLO DE PRUEBA: se esperaba rechazar una formación inexistente.';
 END TRY
 BEGIN CATCH
-    PRINT 'FALLIDO esperado (formación inexistente): ' + ERROR_MESSAGE();
+    PRINT 'FALLO esperado (formación inexistente): ' + ERROR_MESSAGE();
 END CATCH;
 
 SELECT TOP (1) @FormacionID=FormacionID FROM torneo.Formacion ORDER BY FormacionID;
@@ -566,7 +565,7 @@ BEGIN
         PRINT 'FALLO DE PRUEBA: se esperaba error por regla de alineación, si corresponde a estos datos.';
     END TRY
     BEGIN CATCH
-        PRINT 'FALLIDO esperado (jugador posiblemente repetido/suspendido o restricción): ' + ERROR_MESSAGE();
+        PRINT 'FALLO esperado (jugador posiblemente repetido/suspendido o restricción): ' + ERROR_MESSAGE();
     END CATCH;
 END;
 
@@ -617,7 +616,7 @@ BEGIN TRY
     PRINT 'FALLO DE PRUEBA: se esperaba rechazar un partido inexistente.';
 END TRY
 BEGIN CATCH
-    PRINT 'FALLIDO esperado (partido inexistente): ' + ERROR_MESSAGE();
+    PRINT 'FALLO esperado (partido inexistente): ' + ERROR_MESSAGE();
 END CATCH;
 
 IF @PartidoID IS NOT NULL AND @JugadorSaleID IS NOT NULL
@@ -630,7 +629,7 @@ BEGIN
         PRINT 'FALLO DE PRUEBA: se esperaba rechazar el mismo jugador entrando y saliendo.';
     END TRY
     BEGIN CATCH
-        PRINT 'FALLIDO esperado (mismo jugador entra y sale): ' + ERROR_MESSAGE();
+        PRINT 'FALLO esperado (mismo jugador entra y sale): ' + ERROR_MESSAGE();
     END CATCH;
 END;
 
@@ -677,7 +676,7 @@ BEGIN TRY
     PRINT 'FALLO DE PRUEBA: se esperaba rechazar un partido inexistente.';
 END TRY
 BEGIN CATCH
-    PRINT 'FALLIDO esperado (partido inexistente): ' + ERROR_MESSAGE();
+    PRINT 'FALLO esperado (partido inexistente): ' + ERROR_MESSAGE();
 END CATCH;
 
 IF @PartidoID IS NOT NULL
@@ -689,7 +688,7 @@ BEGIN
         PRINT 'FALLO DE PRUEBA: se esperaba rechazar un goleador inexistente.';
     END TRY
     BEGIN CATCH
-        PRINT 'FALLIDO esperado (goleador inexistente): ' + ERROR_MESSAGE();
+        PRINT 'FALLO esperado (goleador inexistente): ' + ERROR_MESSAGE();
     END CATCH;
 END;
 
@@ -737,7 +736,7 @@ BEGIN TRY
     PRINT 'FALLO DE PRUEBA: se esperaba rechazar un tipo de tarjeta inexistente.';
 END TRY
 BEGIN CATCH
-    PRINT 'FALLIDO esperado (tarjeta inexistente): ' + ERROR_MESSAGE();
+    PRINT 'FALLO esperado (tarjeta inexistente): ' + ERROR_MESSAGE();
 END CATCH;
 
 BEGIN TRY
@@ -747,7 +746,7 @@ BEGIN TRY
     PRINT 'FALLO DE PRUEBA: se esperaba rechazar un partido inexistente.';
 END TRY
 BEGIN CATCH
-    PRINT 'FALLIDO esperado (partido inexistente): ' + ERROR_MESSAGE();
+    PRINT 'FALLO esperado (partido inexistente): ' + ERROR_MESSAGE();
 END CATCH;
 
 SELECT * FROM Reglamento.TarjetaAsignada;
@@ -806,7 +805,7 @@ BEGIN TRY
     PRINT 'FALLO DE PRUEBA: se esperaba rechazar un partido inexistente.';
 END TRY
 BEGIN CATCH
-    PRINT 'FALLIDO esperado (partido inexistente): ' + ERROR_MESSAGE();
+    PRINT 'FALLO esperado (partido inexistente): ' + ERROR_MESSAGE();
 END CATCH;
 
 IF @PartidoID IS NOT NULL
@@ -818,7 +817,7 @@ BEGIN
         PRINT 'FALLO DE PRUEBA: se esperaba rechazar un árbitro inexistente.';
     END TRY
     BEGIN CATCH
-        PRINT 'FALLIDO esperado (árbitro inexistente): ' + ERROR_MESSAGE();
+        PRINT 'FALLO esperado (árbitro inexistente): ' + ERROR_MESSAGE();
     END CATCH;
 END;
 
@@ -863,7 +862,7 @@ BEGIN TRY
     PRINT 'FALLO DE PRUEBA: se esperaba rechazar un partido inexistente.';
 END TRY
 BEGIN CATCH
-    PRINT 'FALLIDO esperado (partido inexistente): ' + ERROR_MESSAGE();
+    PRINT 'FALLO esperado (partido inexistente): ' + ERROR_MESSAGE();
 END CATCH;
 
 SELECT TOP (1) @PiezaPartidoID=PartidoID
@@ -878,7 +877,7 @@ BEGIN
         PRINT 'FALLO DE PRUEBA: se esperaba rechazar un partido que ya tiene cuatro espacios ocupados.';
     END TRY
     BEGIN CATCH
-        PRINT 'FALLIDO esperado (cuatro espacios ya ocupados): ' + ERROR_MESSAGE();
+        PRINT 'FALLO esperado (cuatro espacios ya ocupados): ' + ERROR_MESSAGE();
     END CATCH;
 END
 ELSE PRINT 'OMITIDO: no se encontró partido con los cuatro espacios ya ocupados para probar esa validación.';
