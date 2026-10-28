@@ -883,3 +883,39 @@ END
 ELSE PRINT 'OMITIDO: no se encontró partido con los cuatro espacios ya ocupados para probar esa validación.';
 
 SELECT * FROM Publicidad.Exhibicion;
+
+
+
+-- =============================================================
+-- torneo.SP_ImportarFixture_XML
+-- =============================================================
+EXEC sp_configure 'show advanced options', 1;	
+RECONFIGURE;
+GO
+EXEC sp_configure 'Ole Automation Procedures', 1;	
+RECONFIGURE;
+GO
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'torneo' AND TABLE_NAME = 'FinalesArbitrosCompleto')
+BEGIN
+    CREATE TABLE torneo.FinalesArbitrosCompleto (
+        FinalID INT IDENTITY(1,1) PRIMARY KEY,
+        Anio INT NOT NULL,
+        Referee VARCHAR(300) NOT NULL,
+        AssistantReferees VARCHAR(500) NULL,
+        FourthOfficial VARCHAR(300) NULL,
+        ReserveFifthOfficial VARCHAR(300) NULL,
+        VARAndAssistantVARs VARCHAR(500) NULL,
+        FechaImportacion DATETIME DEFAULT GETDATE(),
+        CONSTRAINT UQ_Final_AnioCompleto UNIQUE (Anio)
+    );
+END
+GO
+
+EXEC torneo.sp_ImportarFinalesArbitrosWikipediaCompleto;
+GO
+
+SELECT Anio, Referee, AssistantReferees, FourthOfficial, ReserveFifthOfficial, VARAndAssistantVARs
+FROM torneo.FinalesArbitrosCompleto
+ORDER BY Anio ASC;
+GO

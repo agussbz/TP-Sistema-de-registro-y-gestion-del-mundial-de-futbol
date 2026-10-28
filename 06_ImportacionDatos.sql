@@ -422,3 +422,155 @@ BEGIN
     END CATCH;
 END
 GO
+
+
+-- ===============================================
+-- SCRAPING: "List of FIFA World Cup referees"
+-- ===============================================
+CREATE OR ALTER PROCEDURE torneo.sp_ImportarFinalesArbitrosWikipediaCompleto
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @Object INT;
+    DECLARE @URL VARCHAR(500) = 'https://en.wikipedia.org/wiki/List_of_FIFA_World_Cup_referees';
+    DECLARE @HtmlTable TABLE (ContenidoHTML VARCHAR(MAX));
+    DECLARE @Html VARCHAR(MAX);
+    DECLARE @ErrorMensaje VARCHAR(4000);
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        EXEC sp_OACreate 'MSXML2.ServerXMLHttp.6.0', @Object OUT;
+        EXEC sp_OAMethod @Object, 'OPEN', NULL, 'GET', @URL, 'FALSE';
+        EXEC sp_OAMethod @Object, 'setRequestHeader', NULL, 'User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)';
+        EXEC sp_OAMethod @Object, 'SEND';
+
+        INSERT INTO @HtmlTable
+        EXEC sp_OAGetProperty @Object, 'RESPONSETEXT';
+
+        EXEC sp_OADestroy @Object;
+
+        SELECT @Html = ContenidoHTML FROM @HtmlTable;
+
+        IF @Html IS NULL OR LEN(@Html) = 0
+            THROW 50001, 'No se pudo obtener el HTML de Wikipedia.', 1;
+
+        DECLARE @InicioTabla INT = CHARINDEX('Year</th>', @Html);
+        IF @InicioTabla > 0
+            SET @Html = SUBSTRING(@Html, @InicioTabla, LEN(@Html));
+
+        CREATE TABLE #Filas (
+            FilaID INT IDENTITY(1,1),
+            TextoFila VARCHAR(MAX)
+        );
+
+        DECLARE @PosTR_Start INT, @PosTR_End INT, @ChunkTR VARCHAR(MAX);
+        SET @PosTR_Start = CHARINDEX('<tr', @Html);
+
+        WHILE @PosTR_Start > 0 AND LEN(@Html) > 0
+        BEGIN
+            SET @PosTR_End = CHARINDEX('</tr>', @Html, @PosTR_Start);
+            IF @PosTR_End = 0 BREAK;
+
+            SET @ChunkTR = SUBSTRING(@Html, @PosTR_Start, @PosTR_End - @PosTR_Start + 5);
+
+            IF @ChunkTR LIKE '%<td%' AND @ChunkTR NOT LIKE '%Squads%' AND @ChunkTR NOT LIKE '%Broadcasters%'
+            BEGIN
+                INSERT INTO #Filas (TextoFila) VALUES (@ChunkTR);
+            END;
+
+            SET @Html = SUBSTRING(@Html, @PosTR_End + 5, LEN(@Html));
+            SET @PosTR_Start = CHARINDEX('<tr', @Html);
+        END;
+
+        DECLARE @Fila VARCHAR(MAX);
+        DECLARE @Anio INT;
+
+        DECLARE @TD1 VARCHAR(MAX), @TD2 VARCHAR(MAX), @TD3 VARCHAR(MAX);
+        DECLARE @TD4 VARCHAR(MAX) = '—', @TD5 VARCHAR(MAX) = '—', @TD6 VARCHAR(MAX) = '—';
+
+        DECLARE curFilas CURSOR LOCAL FAST_FORWARD FOR 
+            SELECT TextoFila FROM #Filas;
+
+        OPEN curFilas;
+        FETCH NEXT FROM curFilas INTO @Fila;
+
+        WHILE @@FETCH_STATUS = 0
+        BEGIN
+            SET @Fila = REPLACE(REPLACE(@Fila, '<br/>', ', '), '<br id=', ', <br id=');
+
+            SET @TD1 = ''; SET @TD2 = ''; SET @TD3 = ''; 
+            SET @TD4 = '—'; SET @TD5 = '—'; SET @TD6 = '—';
+
+            DECLARE @P_Start INT = 1, @P_End INT = 1, @CellIndex INT = 1;
+            DECLARE @CurrentTD VARCHAR(MAX);
+
+            WHILE @CellIndex <= 6
+            BEGIN
+                SET @P_Start = CHARINDEX('<td', @Fila, @P_End);
+                IF @P_Start = 0 BREAK; 
+
+                SET @P_End = CHARINDEX('</td>', @Fila, @P_Start);
+                IF @P_End = 0 BREAK;
+
+                SET @CurrentTD = SUBSTRING(@Fila, @P_Start, @P_End - @P_Start);
+
+                WHILE CHARINDEX('<', @CurrentTD) > 0 AND CHARINDEX('>', @CurrentTD) > CHARINDEX('<', @CurrentTD)
+                    SET @CurrentTD = STUFF(@CurrentTD, CHARINDEX('<', @CurrentTD), CHARINDEX('>', @CurrentTD) - CHARINDEX('<', @CurrentTD) + 1, '');
+
+                SET @CurrentTD = LTRIM(RTRIM(REPLACE(REPLACE(@CurrentTD, CHAR(10), ''), CHAR(13), '')));
+
+                IF @CellIndex = 1 SET @TD1 = @CurrentTD;
+                IF @CellIndex = 2 SET @TD2 = @CurrentTD;
+                IF @CellIndex = 3 SET @TD3 = @CurrentTD;
+                IF @CellIndex = 4 SET @TD4 = @CurrentTD;
+                IF @CellIndex = 5 SET @TD5 = @CurrentTD;
+                IF @CellIndex = 6 SET @TD6 = @CurrentTD;
+
+                SET @CellIndex = @CellIndex + 1;
+                SET @P_End = @P_End + 5; 
+            END;
+
+            BEGIN
+                SET @Anio = CAST(LEFT(@TD1, 4) AS INT);
+
+                IF EXISTS (SELECT 1 FROM torneo.FinalesArbitrosCompleto WHERE Anio = @Anio)
+                BEGIN
+                    UPDATE torneo.FinalesArbitrosCompleto
+                    SET Referee = LEFT(@TD2, 300),
+                        AssistantReferees = LEFT(@TD3, 500),
+                        FourthOfficial = LEFT(@TD4, 300),
+                        ReserveFifthOfficial = LEFT(@TD5, 300),
+                        VARAndAssistantVARs = LEFT(@TD6, 500),
+                        FechaImportacion = GETDATE()
+                    WHERE Anio = @Anio;
+                END
+                ELSE
+                BEGIN
+                    INSERT INTO torneo.FinalesArbitrosCompleto (Anio, Referee, AssistantReferees, FourthOfficial, ReserveFifthOfficial, VARAndAssistantVARs)
+                    VALUES (@Anio, LEFT(@TD2, 300), LEFT(@TD3, 500), LEFT(@TD4, 300), LEFT(@TD5, 300), LEFT(@TD6, 500));
+                END;
+
+            FETCH NEXT FROM curFilas INTO @Fila;
+        END;
+
+        CLOSE curFilas;
+        DEALLOCATE curFilas;
+
+        DROP TABLE #Filas;
+
+        COMMIT TRANSACTION;
+        PRINT 'Importación completa y alineada correctamente.';
+
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+        IF OBJECT_ID('tempdb..#Filas') IS NOT NULL DROP TABLE #Filas;
+        IF @Object IS NOT NULL EXEC sp_OADestroy @Object;
+
+        SET @ErrorMensaje = ERROR_MESSAGE();
+        THROW 50002, @ErrorMensaje, 1;
+    END CATCH;
+END;
+GO
