@@ -934,6 +934,7 @@ EXEC publicidad.ConvertirMonedaAUSD
 PRINT CONCAT('Monto convertido a USD: ', @Resultado);
 GO
 
+-- Otro ejemplo
 DECLARE @Resultado2 DECIMAL(18,2);
 EXEC publicidad.ConvertirMonedaAUSD
     @Monto = 10.0, 
@@ -941,4 +942,42 @@ EXEC publicidad.ConvertirMonedaAUSD
     @MontoConvertido = @Resultado2 OUTPUT;
 
 PRINT CONCAT('Monto convertido a USD: ', @Resultado2);
+GO
+
+
+
+-- ==================================================
+-- API: Consultar feriados
+-- ==================================================
+DECLARE @Resultado BIT;
+DECLARE @Descripcion VARCHAR(100);
+
+EXEC publicidad.SP_VerificarFeriadoMercado
+    @CodigoPais = 'US',
+    @Anio = 2026,
+    @FechaPartido = '2026-07-04',
+    @EsFeriado = @Resultado OUTPUT,
+    @NombreFeriado = @Descripcion OUTPUT;
+
+IF @Resultado = 1
+    PRINT CONCAT('Es feriado. Motivo: ', @Descripcion);
+ELSE
+    PRINT 'Es un día hábil normal.';
+GO
+
+-- Otro ejemplo
+DECLARE @Resultado BIT;
+DECLARE @Descripcion VARCHAR(100);
+
+EXEC publicidad.SP_VerificarFeriadoMercado
+    @CodigoPais = 'AR',
+    @Anio = 2026,
+    @FechaPartido = '2026-05-25',
+    @EsFeriado = @Resultado OUTPUT,
+    @NombreFeriado = @Descripcion OUTPUT;
+
+IF @Resultado = 1
+    PRINT CONCAT('Es feriado. Motivo: ', @Descripcion);
+ELSE
+    PRINT 'Es un día hábil normal.';
 GO

@@ -620,3 +620,53 @@ GO
 
 
 
+-- ==================================================
+-- API: Consultar feriados
+-- ==================================================
+CREATE OR ALTER PROCEDURE publicidad.SP_VerificarFeriadoMercado
+    @CodigoPais VARCHAR(5),       
+    @Anio INT,                     
+    @FechaPartido DATE,            
+    @EsFeriado BIT OUTPUT,         
+    @NombreFeriado VARCHAR(100) OUTPUT 
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @url NVARCHAR(256) = CONCAT('https://nagerholidays.com/api/v4/Holidays/', @CodigoPais, '/', @Anio);
+    
+    DECLARE @Object INT;
+    DECLARE @respuesta NVARCHAR(MAX);
+    DECLARE @json TABLE(DATA NVARCHAR(MAX));
+
+    SET @EsFeriado = 0;
+    SET @NombreFeriado = NULL;
+
+    EXEC sp_OACreate 'MSXML2.XMLHTTP', @Object OUT;
+    EXEC sp_OAMethod @Object, 'OPEN', NULL, 'GET', @url, 'FALSE';
+    EXEC sp_OAMethod @Object, 'SEND';
+    EXEC sp_OAMethod @Object, 'RESPONSETEXT', @respuesta OUTPUT;
+
+    INSERT INTO @json 
+    EXEC sp_OAGetProperty @Object, 'RESPONSETEXT';
+
+    EXEC sp_OADestroy @Object;
+
+    DECLARE @datos NVARCHAR(MAX) = (SELECT DATA FROM @json);
+
+    SELECT TOP 1 @NombreFeriado = name
+    FROM OPENJSON(@datos)
+    WITH (
+        date VARCHAR(20) '$.date',
+        name VARCHAR(100) '$.name',
+        nationalHoliday BIT '$.nationalHoliday'
+    )
+    WHERE date = CAST(@FechaPartido AS VARCHAR(10)) 
+      AND nationalHoliday = 1; 
+
+    IF @NombreFeriado IS NOT NULL
+    BEGIN
+        SET @EsFeriado = 1;
+    END;
+END;
+GO
