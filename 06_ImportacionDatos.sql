@@ -507,18 +507,20 @@ BEGIN
             END;
 
             BEGIN
-                SET @Anio = CAST(LEFT(@TD1, 4) AS INT);
+                SET @Anio = TRY_CAST(LEFT(@TD1, 4) AS INT);
 
-                IF EXISTS (SELECT 1 FROM torneo.FinalesArbitrosCompleto WHERE Anio = @Anio)
+                IF @Anio IS NOT NULL AND @Anio BETWEEN 1930 AND 2030
                 BEGIN
-                    UPDATE torneo.FinalesArbitrosCompleto
-                    SET Referee = LEFT(@TD2, 300),
-                        AssistantReferees = LEFT(@TD3, 500),
-                        FourthOfficial = LEFT(@TD4, 300),
-                        ReserveFifthOfficial = LEFT(@TD5, 300),
-                        VARAndAssistantVARs = LEFT(@TD6, 500),
-                        FechaImportacion = GETDATE()
-                    WHERE Anio = @Anio;
+                    IF EXISTS (SELECT 1 FROM torneo.FinalesArbitrosCompleto WHERE Anio = @Anio)
+                    BEGIN
+                        UPDATE torneo.FinalesArbitrosCompleto
+                        SET Referee = LEFT(@TD2, 300),
+                            AssistantReferees = LEFT(@TD3, 500),
+                            FourthOfficial = LEFT(@TD4, 300),
+                            ReserveFifthOfficial = LEFT(@TD5, 300),
+                            VARAndAssistantVARs = LEFT(@TD6, 500),
+                            FechaImportacion = GETDATE()
+                        WHERE Anio = @Anio;
                 END
                 ELSE
                 BEGIN
@@ -526,6 +528,7 @@ BEGIN
                     VALUES (@Anio, LEFT(@TD2, 300), LEFT(@TD3, 500), LEFT(@TD4, 300), LEFT(@TD5, 300), LEFT(@TD6, 500));
                 END;
             END
+        END
             FETCH NEXT FROM curFilas INTO @Fila;
         END;
 
