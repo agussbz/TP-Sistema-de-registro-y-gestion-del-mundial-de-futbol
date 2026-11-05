@@ -525,7 +525,7 @@ BEGIN
                     INSERT INTO torneo.FinalesArbitrosCompleto (Anio, Referee, AssistantReferees, FourthOfficial, ReserveFifthOfficial, VARAndAssistantVARs)
                     VALUES (@Anio, LEFT(@TD2, 300), LEFT(@TD3, 500), LEFT(@TD4, 300), LEFT(@TD5, 300), LEFT(@TD6, 500));
                 END;
-
+            END
             FETCH NEXT FROM curFilas INTO @Fila;
         END;
 
@@ -588,7 +588,7 @@ BEGIN
         SELECT @JsonData = RespuestaJSON FROM @JsonTable;
 
         IF @JsonData IS NULL OR LEN(@JsonData) = 0
-        BEGIN
+        BEGIN;
             THROW 50001, 'No se pudo obtener respuesta de la API de tipos de cambio.', 1;
         END;
 
@@ -601,7 +601,7 @@ BEGIN
         WHERE quote = UPPER(LTRIM(RTRIM(@MonedaOrigen)));
 
         IF @TasaCambio IS NULL OR @TasaCambio = 0
-        BEGIN
+        BEGIN;
             THROW 50002, 'No se encontró la tasa de cambio para la moneda solicitada en la API.', 1;
         END;
 
