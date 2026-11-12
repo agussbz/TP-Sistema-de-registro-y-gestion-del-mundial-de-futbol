@@ -16,6 +16,8 @@ GO
 -- Pruebas de Persona
 -- =======================
 
+SELECT * FROM torneo.Persona
+
 PRINT 'PRUEBAS DE ALTA'
 
 -- EXITO
@@ -59,6 +61,7 @@ EXEC torneo.SP_Alta_Persona
     @Apellido = 'Rios',
     @FechaNacimiento = '2099-01-01';
 
+SELECT * FROM torneo.Persona
 
 PRINT 'PRUEBAS DE MODIFICACION'
 
@@ -111,6 +114,7 @@ EXEC torneo.SP_Modificacion_Persona
     @Apellido = 'Rios',
     @FechaNacimiento = '2099-01-01';
 
+SELECT * FROM torneo.Persona
 
 PRINT 'PRUEBAS DE BAJA'
 
@@ -124,9 +128,13 @@ EXEC torneo.SP_Baja_Persona
 GO
 
 
+SELECT * FROM torneo.Persona
+
 -- =======================
 -- Pruebas de Formacion
 -- =======================
+
+SELECT * FROM torneo.Formacion
 
 PRINT 'PRUEBAS DE ALTA'
 
@@ -152,6 +160,7 @@ EXEC torneo.SP_Alta_Formacion
 EXEC torneo.SP_Alta_Formacion
     @EsquemaTactico = NULL;
 
+SELECT * FROM torneo.Formacion
 
 PRINT 'PRUEBAS DE MODIFICACION'
 
@@ -181,6 +190,7 @@ EXEC torneo.SP_Modificacion_Formacion
     @FormacionID = @ID_Prueba_Formacion,
     @EsquemaTactico = NULL;
 
+SELECT * FROM torneo.Formacion
 
 PRINT 'PRUEBAS DE BAJA'
 
@@ -193,11 +203,14 @@ EXEC torneo.SP_Baja_Formacion
     @FormacionID = 99999;
 GO
 
+SELECT * FROM torneo.Formacion
 
 --=======================
 -- Pruebas de Pais
 --=======================
- 
+
+SELECT * FROM torneo.Pais
+
 PRINT 'PRUEBAS DE ALTA'
  
 -- EXITO
@@ -211,7 +224,10 @@ EXEC Torneo.SP_Alta_Pais @nombre = 'Venezuela', @PBI = 1000.00, @husoHorario = '
 EXEC Torneo.SP_Alta_Pais @nombre = '', @PBI = 1000.00, @husoHorario = 'UTC-0';
 EXEC Torneo.SP_Alta_Pais @nombre = 'Argentina', @PBI = 1000.00, @husoHorario = 'UTC-3';
 EXEC Torneo.SP_Alta_Pais @nombre = '   ', @PBI = 1000.00, @husoHorario = 'UTC-0';
- 
+
+
+SELECT * FROM torneo.Pais
+
 PRINT 'PRUEBAS DE MODIFICACIÓN'
  
 DECLARE @ID_Pais_Prueba INT = (SELECT PaisID FROM torneo.Pais WHERE Nombre = 'Venezuela');
@@ -247,7 +263,10 @@ EXEC Torneo.SP_Modificacion_Pais
     @nombre = '',
     @PBI = 100.00,
     @husoHorario = 'UTC-3';
- 
+
+
+SELECT * FROM torneo.Pais 
+
 PRINT 'PRUEBAS DE BAJA'
  
 -- EXITO
@@ -265,10 +284,15 @@ ELSE
 GO
 
 
+SELECT * FROM torneo.Pais
+
+
 --=======================
 -- Pruebas de Tarjeta
 --=======================
- 
+
+SELECT * FROM reglamento.Tarjeta
+
 PRINT 'PRUEBAS DE ALTA'
 
 -- EXITO
@@ -282,6 +306,9 @@ EXEC reglamento.SP_Alta_Tarjeta @tipo = 'Tarjeta De Prueba';
 EXEC reglamento.SP_Alta_Tarjeta @tipo = '';
 EXEC reglamento.SP_Alta_Tarjeta @tipo = 'Amarilla';
 EXEC reglamento.SP_Alta_Tarjeta @tipo = '   ';
+
+
+SELECT * FROM reglamento.Tarjeta
  
 PRINT 'PRUEBAS DE MODIFICACIÓN'
  
@@ -295,6 +322,8 @@ EXEC reglamento.SP_Modificacion_Tarjeta @TarjetaID = 99999, @tipo = 'Tarjeta Ine
 EXEC reglamento.SP_Modificacion_Tarjeta @TarjetaID = @ID_Tarjeta_Prueba, @tipo = '';
 EXEC reglamento.SP_Modificacion_Tarjeta @TarjetaID = @ID_Tarjeta_Prueba, @tipo = 'Roja';
 EXEC reglamento.SP_Modificacion_Tarjeta @TarjetaID = 99999, @tipo = '';
+
+SELECT * FROM reglamento.Tarjeta
  
 PRINT 'PRUEBAS DE BAJA'
  
@@ -305,10 +334,76 @@ EXEC reglamento.SP_Baja_Tarjeta @TarjetaID = @ID_Tarjeta_Prueba;
 EXEC reglamento.SP_Baja_Tarjeta @TarjetaID = 99999;
 GO
 
+SELECT * FROM reglamento.Tarjeta
+
+--=======================
+-- Pruebas de Seleccion
+--=======================
+
+SELECT * FROM torneo.Seleccion
+
+PRINT 'PRUEBAS DE ALTA'
+
+-- EXITO
+EXEC torneo.SP_Alta_Seleccion @Pais = 'Argentina', @Confederacion = 'CONMEBOL';
+EXEC torneo.SP_Alta_Seleccion @Pais = 'Brasil', @Confederacion = 'CONMEBOL';
+
+-- EXITO para modificar y eliminar
+EXEC torneo.SP_Alta_Seleccion @Pais = 'Seleccion De Prueba', @Confederacion = 'Test';
+
+-- FRACASO
+EXEC torneo.SP_Alta_Seleccion @Pais = '', @Confederacion = 'CONMEBOL';
+EXEC torneo.SP_Alta_Seleccion @Pais = 'Argentina', @Confederacion = '';
+EXEC torneo.SP_Alta_Seleccion @Pais = 'Argentina', @Confederacion = 'CONMEBOL';
+
+
+SELECT * FROM torneo.Seleccion
+
+PRINT 'PRUEBAS DE MODIFICACIÓN'
+
+DECLARE @ID_Prueba INT = (SELECT SeleccionID FROM torneo.Seleccion WHERE Pais = 'Seleccion De Prueba');
+
+-- EXITO
+EXEC torneo.SP_Modificacion_Seleccion 
+    @SeleccionID = @ID_Prueba, 
+    @Pais = 'Seleccion de Prueba Modificada', 
+    @Confederacion = 'Test modificado';
+
+-- FRACASO
+EXEC torneo.SP_Modificacion_Seleccion 
+    @SeleccionID = 99999,
+    @Pais = 'Holanda', 
+    @Confederacion = 'UEFA'; 
+
+EXEC torneo.SP_Modificacion_Seleccion 
+    @SeleccionID = @ID_Prueba, 
+    @Pais = '',
+    @Confederacion = 'UEFA'; 
+
+EXEC torneo.SP_Modificacion_Seleccion 
+    @SeleccionID = @ID_Prueba, 
+    @Pais = 'Holanda',
+    @Confederacion = ''; 
+
+SELECT * FROM torneo.Seleccion
+
+
+PRINT 'PRUEBAS DE BAJA'
+
+-- EXITO:
+EXEC torneo.SP_Baja_Seleccion @SeleccionID = @ID_Prueba;
+
+-- FRACASO
+EXEC torneo.SP_Baja_Seleccion @SeleccionID = 99999;
+GO
+
+SELECT * FROM torneo.Seleccion
 
 --=======================
 -- Pruebas de Convocatoria
 --=======================
+
+SELECT * FROM torneo.Convocatoria
  
 PRINT 'PRUEBAS DE ALTA'
  
@@ -321,6 +416,9 @@ EXEC torneo.SP_Alta_Convocatoria @SeleccionID = 1;
 -- FRACASO
 EXEC torneo.SP_Alta_Convocatoria @SeleccionID = 99999;
  
+
+SELECT * FROM torneo.Convocatoria
+
 PRINT 'PRUEBAS DE MODIFICACIÓN'
  
 DECLARE @ID_Convocatoria_Prueba INT = (SELECT TOP 1 ConvocatoriaID FROM torneo.Convocatoria);
@@ -332,6 +430,8 @@ EXEC torneo.SP_Modificacion_Convocatoria @ConvocatoriaID = @ID_Convocatoria_Prue
 EXEC torneo.SP_Modificacion_Convocatoria @ConvocatoriaID = 99999, @SeleccionID = 1;
 EXEC torneo.SP_Modificacion_Convocatoria @ConvocatoriaID = @ID_Convocatoria_Prueba, @SeleccionID = 99999;
 EXEC torneo.SP_Modificacion_Convocatoria @ConvocatoriaID = 99999, @SeleccionID = 99999;
+
+SELECT * FROM torneo.Convocatoria
  
 PRINT 'PRUEBAS DE BAJA'
  
@@ -348,6 +448,10 @@ IF @Jugador_Baja IS NOT NULL
 GO
 
 
+SELECT * FROM torneo.Convocatoria
+
+
+
 --=======================
 -- Pruebas de Cuerpo Tecnico
 --=======================
@@ -355,6 +459,8 @@ GO
 DECLARE @ID_Persona_A INT = (SELECT TOP 1 PersonaID FROM torneo.Persona);
 DECLARE @ID_Persona_B INT = (SELECT MAX(PersonaID) FROM torneo.Persona);
 DECLARE @ID_Persona_C INT = (SELECT MIN(PersonaID) FROM torneo.Persona);
+
+SELECT * FROM torneo.CuerpoTecnico
 
 PRINT 'PRUEBAS DE ALTA'
  
@@ -370,12 +476,21 @@ EXEC torneo.SP_Alta_CuerpoTecnico @PersonaID = @ID_Persona_C, @SeleccionID = 999
 EXEC torneo.SP_Alta_CuerpoTecnico @PersonaID = @ID_Persona_A, @SeleccionID = 1, @rol = 'Director Tecnico';
 EXEC torneo.SP_Alta_CuerpoTecnico @PersonaID = @ID_Persona_C, @SeleccionID = 1, @rol = 'Director Tecnico';
 EXEC torneo.SP_Alta_CuerpoTecnico @PersonaID = 99999, @SeleccionID = 99999, @rol = '';
+
+
+SELECT * FROM torneo.CuerpoTecnico
  
 PRINT 'PRUEBAS DE MODIFICACIÓN'
  
 -- EXITO
 EXEC torneo.SP_Modificacion_CuerpoTecnico
     @PersonaID = @ID_Persona_B,
+    @SeleccionID = 2,
+    @SeleccionAnterior = 1,
+    @rol = 'Asistente';
+
+EXEC torneo.SP_Modificacion_CuerpoTecnico
+    @PersonaID = @ID_Persona_C,
     @SeleccionID = 2,
     @SeleccionAnterior = 1,
     @rol = 'Asistente';
@@ -394,12 +509,6 @@ EXEC torneo.SP_Modificacion_CuerpoTecnico
     @rol = 'Asistente';
  
 EXEC torneo.SP_Modificacion_CuerpoTecnico
-    @PersonaID = @ID_Persona_C,
-    @SeleccionID = 2,
-    @SeleccionAnterior = 1,
-    @rol = 'Asistente';
- 
-EXEC torneo.SP_Modificacion_CuerpoTecnico
     @PersonaID = @ID_Persona_B,
     @SeleccionID = 99999,
     @SeleccionAnterior = 2,
@@ -410,21 +519,113 @@ EXEC torneo.SP_Modificacion_CuerpoTecnico
     @SeleccionID = 2,
     @SeleccionAnterior = 2,
     @rol = '';
+
+SELECT * FROM torneo.CuerpoTecnico
  
 PRINT 'PRUEBAS DE BAJA'
  
 -- EXITO
 EXEC torneo.SP_Baja_CuerpoTecnico @PersonaID = @ID_Persona_B;
- 
+EXEC torneo.SP_Baja_CuerpoTecnico @PersonaID = @ID_Persona_C;
+
 -- FRACASO
 EXEC torneo.SP_Baja_CuerpoTecnico @PersonaID = 99999;
-EXEC torneo.SP_Baja_CuerpoTecnico @PersonaID = @ID_Persona_C;
 GO
  
- 
+SELECT * FROM torneo.CuerpoTecnico
+
+
+ --===================
+-- Pruebas de Sede
+--===================
+
+SELECT * FROM torneo.Sede
+
+PRINT 'PRUEBAS DE ALTA'
+
+EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio Azteca', @Ciudad = 'Ciudad de Mexico', @Pais = 'México', @Capacidad = 83264, @HusoHorario = 'UTC-6';
+EXEC torneo.SP_Alta_Sede @NombreEstadio = 'MetLife Stadium', @Ciudad = 'Nueva York', @Pais = 'Estados Unidos', @Capacidad = 82500, @HusoHorario = 'UTC-4';
+
+-- EXITO para modificar y eliminar
+EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio De Prueba', @Ciudad = 'Ciudad Prueba', @Pais = 'Pais Prueba', @Capacidad = 50000, @HusoHorario = 'UTC-0';
+
+-- FRACASO
+EXEC torneo.SP_Alta_Sede @NombreEstadio = '', @Ciudad = 'Los Angeles', @Pais = 'Estados Unidos', @Capacidad = 70000, @HusoHorario = 'UTC-8';
+EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Rose Bowl', @Ciudad = 'Los Angeles', @Pais = 'Estados Unidos', @Capacidad = 0, @HusoHorario = 'UTC-8';
+EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio Azteca', @Ciudad = 'Ciudad de Mexico', @Pais = 'Mexico', @Capacidad = 83264, @HusoHorario = 'UTC-6';
+EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio Azteca', @Ciudad = 'Ciudad de Mexico', @Pais = 'Mexico', @Capacidad = 0, @HusoHorario = 'UTC-8';
+
+
+SELECT * FROM torneo.Sede
+
+PRINT 'PRUEBAS DE MODIFICACIÓN'
+
+DECLARE @ID_Sede_Prueba INT = (SELECT SedeID FROM torneo.Sede WHERE NombreEstadio = 'Estadio De Prueba' AND Ciudad = 'Ciudad Prueba');
+
+-- EXITO
+EXEC torneo.SP_Modificacion_Sede 
+    @SedeID = @ID_Sede_Prueba, 
+    @NombreEstadio = 'Estadio de Prueba Modificado', 
+    @Ciudad = 'Ciudad Modificada',
+    @Pais = 'Pais Modificado',
+    @Capacidad = 60000,
+    @HusoHorario = 'UTC-1';
+
+-- FRACASO
+EXEC torneo.SP_Modificacion_Sede 
+    @SedeID = 99999,
+    @NombreEstadio = 'Estadio', 
+    @Ciudad = 'Ciudad',
+    @Pais = 'Pais',
+    @Capacidad = 40000,
+    @HusoHorario = 'UTC-3';
+
+EXEC torneo.SP_Modificacion_Sede 
+    @SedeID = @ID_Sede_Prueba, 
+    @NombreEstadio = '',
+    @Ciudad = 'Ciudad Modificada',
+    @Pais = 'Pais Modificado',
+    @Capacidad = 60000,
+    @HusoHorario = 'UTC-1';
+
+EXEC torneo.SP_Modificacion_Sede 
+    @SedeID = @ID_Sede_Prueba, 
+    @NombreEstadio = 'Estadio de Prueba Modificado', 
+    @Ciudad = 'Ciudad Modificada',
+    @Pais = 'Pais Modificado',
+    @Capacidad = -100,
+    @HusoHorario = 'UTC-1';
+
+EXEC torneo.SP_Modificacion_Sede 
+    @SedeID = 99999, 
+    @NombreEstadio = '', 
+    @Ciudad = 'Ciudad Modificada',
+    @Pais = 'Pais Modificado',
+    @Capacidad = -100,
+    @HusoHorario = 'UTC-1';
+
+
+
+SELECT * FROM torneo.Sede
+
+PRINT 'PRUEBAS DE BAJA'
+
+-- EXITO:
+EXEC torneo.SP_Baja_Sede @SedeID = @ID_Sede_Prueba;
+
+-- FRACASO
+EXEC torneo.SP_Baja_Sede @SedeID = 99999;
+GO
+
+
+SELECT * FROM torneo.Sede
+
+
 --=======================
 -- Pruebas de Partido
 --=======================
+
+SELECT * FROM torneo.Partido
  
 PRINT 'PRUEBAS DE ALTA'
  
@@ -440,6 +641,10 @@ EXEC torneo.SP_Alta_Partido @SedeID = 99999, @Fase = 'Fase de Grupos', @Asistenc
 EXEC torneo.SP_Alta_Partido @SedeID = 1, @Fase = '', @Asistencia = 1000, @ResultadoFinal = '1-1', @FechaHoraLocal = '2026-06-20 12:00', @FechaHoraUTC = '2026-06-20 18:00';
 EXEC torneo.SP_Alta_Partido @SedeID = 99999, @Fase = '', @Asistencia = 1000, @ResultadoFinal = '1-1', @FechaHoraLocal = '2026-06-20 12:00', @FechaHoraUTC = '2026-06-20 18:00';
  
+
+SELECT * FROM torneo.Partido
+
+
 PRINT 'PRUEBAS DE MODIFICACIÓN'
  
 DECLARE @ID_Partido_Prueba INT = (SELECT MAX(PartidoID) FROM torneo.Partido WHERE Fase = 'Fase De Prueba');
@@ -500,6 +705,10 @@ EXEC torneo.SP_Modificacion_Partido
     @FechaHoraLocal = '2026-06-11 15:00', 
     @FechaHoraUTC = '2026-06-11 21:00';
 
+
+SELECT * FROM torneo.Partido
+
+
 PRINT 'PRUEBAS DE BAJA'
  
 -- EXITO
@@ -510,258 +719,7 @@ EXEC torneo.SP_Baja_Partido @PartidoID = 99999;
 GO
 
 
---=======================
--- Pruebas de Sustitucion
---=======================
- 
-PRINT 'PRUEBAS DE ALTA'
-
--- EXITO
-EXEC torneo.SP_Alta_Sustitucion @PartidoID = 2, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
-EXEC torneo.SP_Alta_Sustitucion @PartidoID = 3, @JugadorSaleID = 2, @JugadorEntraID = 1, @NumeroVentana = 1, @Minuto = 75, @Motivo = 'Lesion';
- 
--- EXITO para modificar y eliminar
-EXEC torneo.SP_Alta_Sustitucion @PartidoID = 1, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 2, @Minuto = 80, @Motivo = 'Precaucion';
- 
--- FRACASO
-EXEC torneo.SP_Alta_Sustitucion @PartidoID = 99999, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
-EXEC torneo.SP_Alta_Sustitucion @PartidoID = 2, @JugadorSaleID = 1, @JugadorEntraID = 99999, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
-EXEC torneo.SP_Alta_Sustitucion @PartidoID = 3, @JugadorSaleID = 99999, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
-EXEC torneo.SP_Alta_Sustitucion @PartidoID = 3, @JugadorSaleID = 1, @JugadorEntraID = 1, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
-EXEC torneo.SP_Alta_Sustitucion @PartidoID = 3, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 0, @Minuto = 60, @Motivo = 'Tactico';
-EXEC torneo.SP_Alta_Sustitucion @PartidoID = 2, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = -1, @Motivo = 'Tactico';
-EXEC torneo.SP_Alta_Sustitucion @PartidoID = 2, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = -10, @Minuto = 60, @Motivo = '';
-EXEC torneo.SP_Alta_Sustitucion @PartidoID = 1, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Otro';
-EXEC torneo.SP_Alta_Sustitucion @PartidoID = 99999, @JugadorSaleID = 99999, @JugadorEntraID = 99999, @NumeroVentana = 0, @Minuto = -1, @Motivo = '';
- 
-PRINT 'PRUEBAS DE MODIFICACIÓN'
- 
-DECLARE @ID_Sustitucion_Prueba INT = (SELECT MAX(SustitucionID) FROM torneo.Sustitucion);
- 
--- EXITO
-EXEC torneo.SP_Modificacion_Sustitucion
-    @SustitucionID = @ID_Sustitucion_Prueba,
-    @PartidoID = 1,
-    @JugadorSaleID = 2,
-    @JugadorEntraID = 1,
-    @NumeroVentana = 3,
-    @Minuto = 85,
-    @Motivo = 'Lesion';
- 
--- FRACASO
-EXEC torneo.SP_Modificacion_Sustitucion @SustitucionID = 99999, @PartidoID = 1, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
-EXEC torneo.SP_Modificacion_Sustitucion @SustitucionID = @ID_Sustitucion_Prueba, @PartidoID = 1, @JugadorSaleID = 1, @JugadorEntraID = 99999, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
-EXEC torneo.SP_Modificacion_Sustitucion @SustitucionID = @ID_Sustitucion_Prueba, @PartidoID = 1, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 0, @Minuto = 60, @Motivo = 'Tactico';
-EXEC torneo.SP_Modificacion_Sustitucion @SustitucionID = @ID_Sustitucion_Prueba, @PartidoID = 1, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = 60, @Motivo = '';
-EXEC torneo.SP_Modificacion_Sustitucion @SustitucionID = @ID_Sustitucion_Prueba, @PartidoID = 1, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Otro';
-EXEC torneo.SP_Modificacion_Sustitucion @SustitucionID = 99999, @PartidoID = 99999, @JugadorSaleID = 99999, @JugadorEntraID = 99999, @NumeroVentana = 0, @Minuto = -1, @Motivo = '';
- 
-PRINT 'PRUEBAS DE BAJA'
- 
--- EXITO
-EXEC torneo.SP_Baja_Sustitucion @SustitucionID = @ID_Sustitucion_Prueba;
- 
--- FRACASO
-EXEC torneo.SP_Baja_Sustitucion @SustitucionID = 99999;
-GO
-
-
---=======================
--- Pruebas de Campaña
---=======================
- 
-PRINT 'PRUEBAS DE ALTA'
-
--- EXITO
-EXEC publicidad.SP_Alta_Campaña @nombre = 'Locos', @fechaInicio = '2026-05-01', @AnuncianteID = 3;
-EXEC publicidad.SP_Alta_Campaña @nombre = 'Soña en grande', @fechaInicio = '2026-06-01', @AnuncianteID = 4;
- 
--- EXITO para modificar y eliminar
-EXEC publicidad.SP_Alta_Campaña @nombre = 'Aliento', @fechaInicio = '2026-06-15', @AnuncianteID = 4;
-
--- FRACASO
-EXEC publicidad.SP_Alta_Campaña @nombre = '', @fechaInicio = '2026-06-15', @AnuncianteID = 1;
-EXEC publicidad.SP_Alta_Campaña @nombre = 'Promo mundial', @fechaInicio = '2026-06-15', @AnuncianteID = 99999;
-EXEC publicidad.SP_Alta_Campaña @nombre = '', @fechaInicio = '2026-06-15', @AnuncianteID = 99999;
- 
-PRINT 'PRUEBAS DE MODIFICACIÓN'
- 
-DECLARE @ID_Campaña_Prueba INT = (SELECT TOP 1 CampañaID FROM publicidad.Campaña WHERE Nombre = 'Aliento');
-
--- EXITO
-EXEC publicidad.SP_Modificacion_Campaña
-    @CampañaID = @ID_Campaña_Prueba,
-    @Nombre = 'Jugamos todos',
-    @fechaInicio = '2026-07-01',
-    @AnuncianteID = 3;
- 
--- FRACASO
-EXEC publicidad.SP_Modificacion_Campaña
-    @CampañaID = 99999,
-    @Nombre = 'Seguro de sedes',
-    @fechaInicio = '2026-07-01',
-    @AnuncianteID = 1;
- 
-EXEC publicidad.SP_Modificacion_Campaña
-    @CampañaID = @ID_Campaña_Prueba,
-    @Nombre = '',
-    @fechaInicio = '2026-07-01',
-    @AnuncianteID = 1;
- 
-EXEC publicidad.SP_Modificacion_Campaña
-    @CampañaID = @ID_Campaña_Prueba,
-    @Nombre = 'Promo mundial',
-    @fechaInicio = '2026-07-01',
-    @AnuncianteID = 99999;
- 
-EXEC publicidad.SP_Modificacion_Campaña
-    @CampañaID = 99999,
-    @Nombre = '',
-    @fechaInicio = '2026-07-01',
-    @AnuncianteID = 99999;
- 
-PRINT 'PRUEBAS DE BAJA'
- 
--- EXITO
-EXEC publicidad.SP_Baja_Campaña @CampañaID = @ID_Campaña_Prueba;
- 
--- FRACASO
-EXEC publicidad.SP_Baja_Campaña @CampañaID = 99999;
-
-DECLARE @idCampañaBaja INT = (SELECT TOP 1 CampañaID FROM publicidad.Campaña);
-EXEC publicidad.SP_Baja_Campaña @idCampañaBaja;
-GO
-
-
---=======================
--- Tabla IDIOMA
---=======================
-PRINT 'PRUEBAS DE ALTA'
-
--- ÉXITO
-EXEC torneo.SP_Alta_Idioma @Nombre = 'Ingles';
-
--- FRACASO
-EXEC torneo.SP_Alta_Idioma @Nombre = '';
-EXEC torneo.SP_Alta_Idioma @Nombre = 'Ingles';
-
-PRINT 'PRUEBAS DE MODIFICACIÓN'
-
-DECLARE @ID_Idioma_Prueba INT = (SELECT IdiomaID FROM torneo.Idioma WHERE Nombre = 'Ingles');
-
--- ÉXITO
-EXEC torneo.SP_Modificacion_Idioma
-    @IdiomaID = @ID_Idioma_Prueba, 
-    @Nombre = 'Portugues';
-
--- FRACASO 1
-EXEC torneo.SP_Modificacion_Idioma 
-    @IdiomaID = 99999,
-    @Nombre = 'Portugues';
-
--- FRACASO 2
-EXEC torneo.SP_Modificacion_Idioma 
-    @IdiomaID = @ID_Idioma_Prueba, 
-    @Nombre = '';
-
-PRINT 'PRUEBAS DE BAJA'
-
--- ÉXITO:
-EXEC torneo.SP_Baja_Idioma @IdiomaID = @ID_Idioma_Prueba;
-
--- FRACASO
-EXEC torneo.SP_Baja_Idioma @IdiomaID = 99999;
-GO
-
-
---=======================
--- Tabla ANUNCIANTE
---=======================
-PRINT 'PRUEBAS DE ALTA'
-
--- ÉXITO
-EXEC publicidad.SP_Alta_Anunciante @Pais = 'Colombia';
-
--- FRACASO
-EXEC publicidad.SP_Alta_Anunciante @Pais = '';
-
-PRINT 'PRUEBAS DE MODIFICACIÓN'
-
-DECLARE @ID_Anunciante_Prueba INT = (SELECT TOP 1 AnuncianteID FROM publicidad.Anunciante WHERE Pais = 'Colombia');
-
--- ÉXITO
-EXEC publicidad.SP_Modificacion_Anunciante
-    @AnuncianteID = @ID_Anunciante_Prueba, 
-    @Pais = 'Colombia';
-
--- FRACASO 1
-EXEC publicidad.SP_Modificacion_Anunciante 
-    @AnuncianteID = 9999,
-    @Pais = 'Colombia';
-
--- FRACASO 2
-EXEC publicidad.SP_Modificacion_Anunciante 
-    @AnuncianteID = @ID_Anunciante_Prueba,
-    @Pais = '';
-
-PRINT 'PRUEBAS DE BAJA'
-
--- ÉXITO:
-EXEC publicidad.SP_Baja_Anunciante @AnuncianteID = @ID_Anunciante_Prueba;
-
--- FRACASO
-EXEC publicidad.SP_Baja_Anunciante @AnuncianteID = 99999;
-GO
-
-
---=======================
--- Tabla Arbitro
---=======================
-PRINT 'PRUEBAS DE ALTA'
-
--- ÉXITO
-EXEC reglamento.SP_ALTA_Arbitro @PersonaID = 1, @Pais = 'Colombia', @RolArbitral = 'Principal';
-
--- FRACASO
-EXEC reglamento.SP_Alta_Arbitro @PersonaID = NULL, @Pais = 'Colombia', @RolArbitral = 'Principal';
-EXEC reglamento.SP_Alta_Arbitro @PersonaID = 2, @Pais = '', @RolArbitral = 'Principal';
-EXEC reglamento.SP_Alta_Arbitro @PersonaID = 2, @Pais = 'Colombia', @RolArbitral = '';
-
-PRINT 'PRUEBAS DE MODIFICACIÓN'
-
-DECLARE @ID_Arbitro_Prueba INT = (SELECT TOP 1 PersonaID FROM reglamento.Arbitro WHERE Pais = 'Colombia');
-
--- ÉXITO
-EXEC reglamento.SP_Modificacion_Arbitro
-    @PersonaID = @ID_Arbitro_Prueba, 
-    @Pais = 'Colombia',
-    @RolArbitral = 'Principal';
-
--- FRACASO 1
-EXEC reglamento.SP_Modificacion_Arbitro 
-    @PersonaID = 9999,
-    @Pais = '',
-    @RolArbitral = 'Principal';
-
--- FRACASO 2
-EXEC reglamento.SP_Modificacion_Arbitro
-    @PersonaID = @ID_Arbitro_Prueba,
-    @Pais = '',
-    @RolArbitral = 'Principal';
-
-EXEC reglamento.SP_Modificacion_Arbitro 
-    @PersonaID = @ID_Arbitro_Prueba,
-    @Pais = 'Colombia',
-    @RolArbitral = '';
-
-PRINT 'PRUEBAS DE BAJA'
-
--- ÉXITO:
-EXEC reglamento.SP_Baja_Arbitro @PersonaID = @ID_Arbitro_Prueba;
-
--- FRACASO
-EXEC reglamento.SP_Baja_Arbitro @PersonaID = 99999;
-GO
+SELECT * FROM torneo.Partido
 
 
 --=======================
@@ -801,6 +759,8 @@ DECLARE @ID_Prueba_Jugador INT = (
     WHERE Nombre = 'Jugador'
       AND Apellido = 'De Prueba'
 );
+
+SELECT * FROM torneo.Jugador
 
 PRINT 'PRUEBAS DE ALTA'
 
@@ -885,6 +845,10 @@ EXEC torneo.SP_Alta_Jugador
     @ConvocatoriaID = @ID_Convocatoria_Jugador;
 
 
+
+SELECT * FROM torneo.Jugador
+
+
 PRINT 'PRUEBAS DE MODIFICACION'
 
 -- EXITO
@@ -944,6 +908,8 @@ EXEC torneo.SP_Modificacion_Jugador
     @ConvocatoriaID = @ID_Convocatoria_Jugador;
 
 
+SELECT * FROM torneo.Jugador
+
 PRINT 'PRUEBAS DE BAJA'
 
 -- EXITO
@@ -958,6 +924,328 @@ EXEC torneo.SP_Baja_Jugador
 EXEC torneo.SP_Baja_Persona
     @PersonaID = @ID_Prueba_Jugador;
 GO
+
+
+SELECT * FROM torneo.Jugador
+
+
+
+--=======================
+-- Pruebas de Sustitucion
+--=======================
+
+SELECT * FROM torneo.Sustitucion
+ 
+PRINT 'PRUEBAS DE ALTA'
+
+-- EXITO
+EXEC torneo.SP_Alta_Sustitucion @PartidoID = 2, @JugadorSaleID = 4, @JugadorEntraID = 5, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
+EXEC torneo.SP_Alta_Sustitucion @PartidoID = 1, @JugadorSaleID = 5, @JugadorEntraID = 4, @NumeroVentana = 1, @Minuto = 75, @Motivo = 'Lesion';
+ 
+-- EXITO para modificar y eliminar
+EXEC torneo.SP_Alta_Sustitucion @PartidoID = 1, @JugadorSaleID = 4, @JugadorEntraID = 5, @NumeroVentana = 2, @Minuto = 80, @Motivo = 'Precaucion';
+ 
+-- FRACASO
+EXEC torneo.SP_Alta_Sustitucion @PartidoID = 99999, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
+EXEC torneo.SP_Alta_Sustitucion @PartidoID = 2, @JugadorSaleID = 1, @JugadorEntraID = 99999, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
+EXEC torneo.SP_Alta_Sustitucion @PartidoID = 3, @JugadorSaleID = 99999, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
+EXEC torneo.SP_Alta_Sustitucion @PartidoID = 3, @JugadorSaleID = 1, @JugadorEntraID = 1, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
+EXEC torneo.SP_Alta_Sustitucion @PartidoID = 3, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 0, @Minuto = 60, @Motivo = 'Tactico';
+EXEC torneo.SP_Alta_Sustitucion @PartidoID = 2, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = -1, @Motivo = 'Tactico';
+EXEC torneo.SP_Alta_Sustitucion @PartidoID = 2, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = -10, @Minuto = 60, @Motivo = '';
+EXEC torneo.SP_Alta_Sustitucion @PartidoID = 1, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Otro';
+EXEC torneo.SP_Alta_Sustitucion @PartidoID = 99999, @JugadorSaleID = 99999, @JugadorEntraID = 99999, @NumeroVentana = 0, @Minuto = -1, @Motivo = '';
+
+
+SELECT * FROM torneo.Sustitucion
+
+PRINT 'PRUEBAS DE MODIFICACIÓN'
+ 
+DECLARE @ID_Sustitucion_Prueba INT = (SELECT MAX(SustitucionID) FROM torneo.Sustitucion);
+ 
+-- EXITO
+EXEC torneo.SP_Modificacion_Sustitucion
+    @SustitucionID = @ID_Sustitucion_Prueba,
+    @PartidoID = 1,
+    @JugadorSaleID = 4,
+    @JugadorEntraID = 5,
+    @NumeroVentana = 3,
+    @Minuto = 85,
+    @Motivo = 'Lesion';
+ 
+-- FRACASO
+EXEC torneo.SP_Modificacion_Sustitucion @SustitucionID = 99999, @PartidoID = 1, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
+EXEC torneo.SP_Modificacion_Sustitucion @SustitucionID = @ID_Sustitucion_Prueba, @PartidoID = 1, @JugadorSaleID = 1, @JugadorEntraID = 99999, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Tactico';
+EXEC torneo.SP_Modificacion_Sustitucion @SustitucionID = @ID_Sustitucion_Prueba, @PartidoID = 1, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 0, @Minuto = 60, @Motivo = 'Tactico';
+EXEC torneo.SP_Modificacion_Sustitucion @SustitucionID = @ID_Sustitucion_Prueba, @PartidoID = 1, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = 60, @Motivo = '';
+EXEC torneo.SP_Modificacion_Sustitucion @SustitucionID = @ID_Sustitucion_Prueba, @PartidoID = 1, @JugadorSaleID = 1, @JugadorEntraID = 2, @NumeroVentana = 1, @Minuto = 60, @Motivo = 'Otro';
+EXEC torneo.SP_Modificacion_Sustitucion @SustitucionID = 99999, @PartidoID = 99999, @JugadorSaleID = 99999, @JugadorEntraID = 99999, @NumeroVentana = 0, @Minuto = -1, @Motivo = '';
+
+
+SELECT * FROM torneo.Sustitucion
+
+PRINT 'PRUEBAS DE BAJA'
+ 
+-- EXITO
+EXEC torneo.SP_Baja_Sustitucion @SustitucionID = @ID_Sustitucion_Prueba;
+ 
+-- FRACASO
+EXEC torneo.SP_Baja_Sustitucion @SustitucionID = 99999;
+GO
+
+
+SELECT * FROM torneo.Sustitucion
+
+
+--=======================
+-- Tabla ANUNCIANTE
+--=======================
+
+SELECT * FROM publicidad.Anunciante
+
+PRINT 'PRUEBAS DE ALTA'
+
+-- ÉXITO
+EXEC publicidad.SP_Alta_Anunciante @Pais = 'Colombia';
+EXEC publicidad.SP_Alta_Anunciante @Pais = 'Argentina';
+
+-- FRACASO
+EXEC publicidad.SP_Alta_Anunciante @Pais = '';
+
+
+SELECT * FROM publicidad.Anunciante
+
+
+PRINT 'PRUEBAS DE MODIFICACIÓN'
+
+DECLARE @ID_Anunciante_Prueba INT = (SELECT TOP 1 AnuncianteID FROM publicidad.Anunciante WHERE Pais = 'Colombia');
+
+-- ÉXITO
+EXEC publicidad.SP_Modificacion_Anunciante
+    @AnuncianteID = @ID_Anunciante_Prueba, 
+    @Pais = 'Colombia';
+
+-- FRACASO 1
+EXEC publicidad.SP_Modificacion_Anunciante 
+    @AnuncianteID = 9999,
+    @Pais = 'Colombia';
+
+-- FRACASO 2
+EXEC publicidad.SP_Modificacion_Anunciante 
+    @AnuncianteID = @ID_Anunciante_Prueba,
+    @Pais = '';
+
+
+SELECT * FROM publicidad.Anunciante
+
+
+PRINT 'PRUEBAS DE BAJA'
+
+-- ÉXITO:
+EXEC publicidad.SP_Baja_Anunciante @AnuncianteID = @ID_Anunciante_Prueba;
+
+-- FRACASO
+EXEC publicidad.SP_Baja_Anunciante @AnuncianteID = 99999;
+GO
+
+
+SELECT * FROM publicidad.Anunciante
+
+
+--=======================
+-- Pruebas de Campaña
+--=======================
+
+SELECT * FROM publicidad.Campaña
+
+PRINT 'PRUEBAS DE ALTA'
+
+-- EXITO
+EXEC publicidad.SP_Alta_Campaña @nombre = 'Locos', @fechaInicio = '2026-05-01', @AnuncianteID = 4;
+EXEC publicidad.SP_Alta_Campaña @nombre = 'Soña en grande', @fechaInicio = '2026-06-01', @AnuncianteID = 4;
+ 
+-- EXITO para modificar y eliminar
+EXEC publicidad.SP_Alta_Campaña @nombre = 'Aliento', @fechaInicio = '2026-06-15', @AnuncianteID = 4;
+
+-- FRACASO
+EXEC publicidad.SP_Alta_Campaña @nombre = '', @fechaInicio = '2026-06-15', @AnuncianteID = 1;
+EXEC publicidad.SP_Alta_Campaña @nombre = 'Promo mundial', @fechaInicio = '2026-06-15', @AnuncianteID = 99999;
+EXEC publicidad.SP_Alta_Campaña @nombre = '', @fechaInicio = '2026-06-15', @AnuncianteID = 99999;
+
+
+SELECT * FROM publicidad.Campaña
+
+ 
+PRINT 'PRUEBAS DE MODIFICACIÓN'
+ 
+DECLARE @ID_Campaña_Prueba INT = (SELECT TOP 1 CampañaID FROM publicidad.Campaña WHERE Nombre = 'Aliento');
+
+-- EXITO
+EXEC publicidad.SP_Modificacion_Campaña
+    @CampañaID = @ID_Campaña_Prueba,
+    @Nombre = 'Jugamos todos',
+    @fechaInicio = '2026-07-01',
+    @AnuncianteID = 4;
+ 
+-- FRACASO
+EXEC publicidad.SP_Modificacion_Campaña
+    @CampañaID = 99999,
+    @Nombre = 'Seguro de sedes',
+    @fechaInicio = '2026-07-01',
+    @AnuncianteID = 1;
+ 
+EXEC publicidad.SP_Modificacion_Campaña
+    @CampañaID = @ID_Campaña_Prueba,
+    @Nombre = '',
+    @fechaInicio = '2026-07-01',
+    @AnuncianteID = 1;
+ 
+EXEC publicidad.SP_Modificacion_Campaña
+    @CampañaID = @ID_Campaña_Prueba,
+    @Nombre = 'Promo mundial',
+    @fechaInicio = '2026-07-01',
+    @AnuncianteID = 99999;
+ 
+EXEC publicidad.SP_Modificacion_Campaña
+    @CampañaID = 99999,
+    @Nombre = '',
+    @fechaInicio = '2026-07-01',
+    @AnuncianteID = 99999;
+
+
+SELECT * FROM publicidad.Campaña
+
+ 
+PRINT 'PRUEBAS DE BAJA'
+ 
+-- EXITO
+EXEC publicidad.SP_Baja_Campaña @CampañaID = @ID_Campaña_Prueba;
+ 
+-- FRACASO
+EXEC publicidad.SP_Baja_Campaña @CampañaID = 99999;
+
+DECLARE @idCampañaBaja INT = (SELECT TOP 1 CampañaID FROM publicidad.Campaña);
+EXEC publicidad.SP_Baja_Campaña @idCampañaBaja;
+GO
+
+SELECT * FROM publicidad.Campaña
+
+
+
+--=======================
+-- Tabla IDIOMA
+--=======================
+
+SELECT * FROM torneo.Idioma
+
+PRINT 'PRUEBAS DE ALTA'
+
+-- ÉXITO
+EXEC torneo.SP_Alta_Idioma @Nombre = 'Ingles';
+EXEC torneo.SP_Alta_Idioma @Nombre = 'Español';
+
+-- FRACASO
+EXEC torneo.SP_Alta_Idioma @Nombre = '';
+EXEC torneo.SP_Alta_Idioma @Nombre = 'Ingles';
+
+PRINT 'PRUEBAS DE MODIFICACIÓN'
+
+DECLARE @ID_Idioma_Prueba INT = (SELECT IdiomaID FROM torneo.Idioma WHERE Nombre = 'Ingles');
+
+-- ÉXITO
+EXEC torneo.SP_Modificacion_Idioma
+    @IdiomaID = @ID_Idioma_Prueba, 
+    @Nombre = 'Portugues';
+
+-- FRACASO 1
+EXEC torneo.SP_Modificacion_Idioma 
+    @IdiomaID = 99999,
+    @Nombre = 'Portugues';
+
+-- FRACASO 2
+EXEC torneo.SP_Modificacion_Idioma 
+    @IdiomaID = @ID_Idioma_Prueba, 
+    @Nombre = '';
+
+    
+SELECT * FROM torneo.Idioma
+
+
+PRINT 'PRUEBAS DE BAJA'
+
+-- ÉXITO:
+EXEC torneo.SP_Baja_Idioma @IdiomaID = @ID_Idioma_Prueba;
+
+-- FRACASO
+EXEC torneo.SP_Baja_Idioma @IdiomaID = 99999;
+GO
+
+SELECT * FROM torneo.Idioma
+
+
+
+--=======================
+-- Tabla Arbitro
+--=======================
+
+SELECT * FROM reglamento.Arbitro
+
+PRINT 'PRUEBAS DE ALTA'
+
+-- ÉXITO
+EXEC reglamento.SP_ALTA_Arbitro @PersonaID = 1, @Pais = 'Colombia', @RolArbitral = 'Principal';
+
+-- FRACASO
+EXEC reglamento.SP_Alta_Arbitro @PersonaID = NULL, @Pais = 'Colombia', @RolArbitral = 'Principal';
+EXEC reglamento.SP_Alta_Arbitro @PersonaID = 2, @Pais = '', @RolArbitral = 'Principal';
+EXEC reglamento.SP_Alta_Arbitro @PersonaID = 2, @Pais = 'Colombia', @RolArbitral = '';
+
+
+
+SELECT * FROM reglamento.Arbitro
+
+PRINT 'PRUEBAS DE MODIFICACIÓN'
+
+DECLARE @ID_Arbitro_Prueba INT = (SELECT TOP 1 PersonaID FROM reglamento.Arbitro WHERE Pais = 'Colombia');
+
+-- ÉXITO
+EXEC reglamento.SP_Modificacion_Arbitro
+    @PersonaID = @ID_Arbitro_Prueba, 
+    @Pais = 'Colombia',
+    @RolArbitral = 'Principal';
+
+-- FRACASO 1
+EXEC reglamento.SP_Modificacion_Arbitro 
+    @PersonaID = 9999,
+    @Pais = '',
+    @RolArbitral = 'Principal';
+
+-- FRACASO 2
+EXEC reglamento.SP_Modificacion_Arbitro
+    @PersonaID = @ID_Arbitro_Prueba,
+    @Pais = '',
+    @RolArbitral = 'Principal';
+
+EXEC reglamento.SP_Modificacion_Arbitro 
+    @PersonaID = @ID_Arbitro_Prueba,
+    @Pais = 'Colombia',
+    @RolArbitral = '';
+
+
+
+SELECT * FROM reglamento.Arbitro
+
+PRINT 'PRUEBAS DE BAJA'
+
+-- ÉXITO:
+EXEC reglamento.SP_Baja_Arbitro @PersonaID = @ID_Arbitro_Prueba;
+
+-- FRACASO
+EXEC reglamento.SP_Baja_Arbitro @PersonaID = 99999;
+GO
+
+
+SELECT * FROM reglamento.Arbitro
 
 
 --=======================
@@ -990,6 +1278,8 @@ DECLARE @ID_Formacion_352 INT = (
 );
 
 
+SELECT * FROM torneo.TieneFormacion
+
 PRINT 'PRUEBAS DE ALTA'
 
 -- EXITO
@@ -1021,6 +1311,8 @@ EXEC torneo.SP_Alta_TieneFormacion
     @PartidoID = @ID_Partido_TF,
     @FormacionID = @ID_Formacion_433;
 
+
+SELECT * FROM torneo.TieneFormacion
 
 PRINT 'PRUEBAS DE MODIFICACION'
 
@@ -1060,6 +1352,9 @@ EXEC torneo.SP_Modificacion_TieneFormacion
     @NuevaFormacionID = @ID_Formacion_433;
 
 
+SELECT * FROM torneo.TieneFormacion
+
+
 PRINT 'PRUEBAS DE BAJA'
 
 -- EXITO
@@ -1074,6 +1369,9 @@ EXEC torneo.SP_Baja_TieneFormacion
 GO
 
 
+SELECT * FROM torneo.TieneFormacion
+
+
 --=======================
 -- Pruebas de PiezaPublicitaria
 --=======================
@@ -1084,6 +1382,8 @@ DECLARE @ID_Campaña_PP INT = (
     FROM publicidad.Campaña
 );
 
+
+SELECT * FROM publicidad.PiezaPublicitaria
 
 PRINT 'PRUEBAS DE ALTA'
 
@@ -1148,6 +1448,9 @@ EXEC publicidad.SP_Alta_PiezaPublicitaria
     @Tarifa = 150000.00,
     @Idioma = 'Español',
     @CampañaID = 99999;
+
+
+SELECT * FROM publicidad.PiezaPublicitaria
 
 
 PRINT 'PRUEBAS DE MODIFICACION'
@@ -1215,6 +1518,9 @@ EXEC publicidad.SP_Modificacion_PiezaPublicitaria
     @CampañaID = 99999;
 
 
+SELECT * FROM publicidad.PiezaPublicitaria
+
+
 PRINT 'PRUEBAS DE BAJA'
 
 -- EXITO
@@ -1225,6 +1531,9 @@ EXEC publicidad.SP_Baja_PiezaPublicitaria
 EXEC publicidad.SP_Baja_PiezaPublicitaria
     @PiezaID = 99999;
 GO
+
+
+SELECT * FROM publicidad.PiezaPublicitaria
 
 
 --=======================
@@ -1243,6 +1552,7 @@ DECLARE @ID_Arbitro_SDA INT = (
     FROM reglamento.Arbitro
 );
 
+SELECT * FROM reglamento.SeDesignaArbitro
 
 PRINT 'PRUEBAS DE ALTA'
 
@@ -1289,6 +1599,8 @@ EXEC reglamento.SP_Alta_SeDesignaArbitro
     @RolArbitral = 'Arbitro principal';
 
 
+SELECT * FROM reglamento.SeDesignaArbitro
+
 PRINT 'PRUEBAS DE MODIFICACION'
 
 -- EXITO
@@ -1320,6 +1632,9 @@ EXEC reglamento.SP_Modificacion_SeDesignaArbitro
     @RolArbitral = '';
 
 
+SELECT * FROM reglamento.SeDesignaArbitro
+
+
 PRINT 'PRUEBAS DE BAJA'
 
 -- EXITO
@@ -1334,6 +1649,10 @@ EXEC reglamento.SP_Baja_SeDesignaArbitro
 GO
 
 
+SELECT * FROM reglamento.SeDesignaArbitro
+
+
+
 --=======================
 -- Pruebas de Exhibicion
 --=======================
@@ -1345,6 +1664,7 @@ DECLARE @ID_Pieza_Exhibicion INT = (
     WHERE Contenido = 'Publicidad Adidas Mundial 2026'
 );
 
+SELECT * FROM publicidad.Exhibicion
 
 PRINT 'PRUEBAS DE ALTA'
 
@@ -1396,6 +1716,8 @@ EXEC publicidad.SP_Alta_Exhibicion
     @PiezaID = @ID_Pieza_Exhibicion,
     @Costo = NULL;
 
+
+SELECT * FROM publicidad.Exhibicion
 
 PRINT 'PRUEBAS DE MODIFICACION'
 
@@ -1455,6 +1777,8 @@ EXEC publicidad.SP_Modificacion_Exhibicion
     @Costo = NULL;
 
 
+SELECT * FROM publicidad.Exhibicion
+
 PRINT 'PRUEBAS DE BAJA'
 
 -- EXITO
@@ -1467,137 +1791,16 @@ EXEC publicidad.SP_Baja_Exhibicion
 GO
 
 
---===================
--- Pruebas de Sede
---===================
-
-PRINT 'PRUEBAS DE ALTA'
-
-EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio Azteca', @Ciudad = 'Ciudad de Mexico', @Pais = 'México', @Capacidad = 83264, @HusoHorario = 'UTC-6';
-EXEC torneo.SP_Alta_Sede @NombreEstadio = 'MetLife Stadium', @Ciudad = 'Nueva York', @Pais = 'Estados Unidos', @Capacidad = 82500, @HusoHorario = 'UTC-4';
-
--- EXITO para modificar y eliminar
-EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio De Prueba', @Ciudad = 'Ciudad Prueba', @Pais = 'Pais Prueba', @Capacidad = 50000, @HusoHorario = 'UTC-0';
-
--- FRACASO
-EXEC torneo.SP_Alta_Sede @NombreEstadio = '', @Ciudad = 'Los Angeles', @Pais = 'Estados Unidos', @Capacidad = 70000, @HusoHorario = 'UTC-8';
-EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Rose Bowl', @Ciudad = 'Los Angeles', @Pais = 'Estados Unidos', @Capacidad = 0, @HusoHorario = 'UTC-8';
-EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio Azteca', @Ciudad = 'Ciudad de Mexico', @Pais = 'Mexico', @Capacidad = 83264, @HusoHorario = 'UTC-6';
-EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio Azteca', @Ciudad = 'Ciudad de Mexico', @Pais = 'Mexico', @Capacidad = 0, @HusoHorario = 'UTC-8';
-
-PRINT 'PRUEBAS DE MODIFICACIÓN'
-
-DECLARE @ID_Sede_Prueba INT = (SELECT SedeID FROM torneo.Sede WHERE NombreEstadio = 'Estadio De Prueba' AND Ciudad = 'Ciudad Prueba');
-
--- EXITO
-EXEC torneo.SP_Modificacion_Sede 
-    @SedeID = @ID_Sede_Prueba, 
-    @NombreEstadio = 'Estadio de Prueba Modificado', 
-    @Ciudad = 'Ciudad Modificada',
-    @Pais = 'Pais Modificado',
-    @Capacidad = 60000,
-    @HusoHorario = 'UTC-1';
-
--- FRACASO
-EXEC torneo.SP_Modificacion_Sede 
-    @SedeID = 99999,
-    @NombreEstadio = 'Estadio', 
-    @Ciudad = 'Ciudad',
-    @Pais = 'Pais',
-    @Capacidad = 40000,
-    @HusoHorario = 'UTC-3';
-
-EXEC torneo.SP_Modificacion_Sede 
-    @SedeID = @ID_Sede_Prueba, 
-    @NombreEstadio = '',
-    @Ciudad = 'Ciudad Modificada',
-    @Pais = 'Pais Modificado',
-    @Capacidad = 60000,
-    @HusoHorario = 'UTC-1';
-
-EXEC torneo.SP_Modificacion_Sede 
-    @SedeID = @ID_Sede_Prueba, 
-    @NombreEstadio = 'Estadio de Prueba Modificado', 
-    @Ciudad = 'Ciudad Modificada',
-    @Pais = 'Pais Modificado',
-    @Capacidad = -100,
-    @HusoHorario = 'UTC-1';
-
-EXEC torneo.SP_Modificacion_Sede 
-    @SedeID = 99999, 
-    @NombreEstadio = '', 
-    @Ciudad = 'Ciudad Modificada',
-    @Pais = 'Pais Modificado',
-    @Capacidad = -100,
-    @HusoHorario = 'UTC-1';
-
-PRINT 'PRUEBAS DE BAJA'
-
--- EXITO:
-EXEC torneo.SP_Baja_Sede @SedeID = @ID_Sede_Prueba;
-
--- FRACASO
-EXEC torneo.SP_Baja_Sede @SedeID = 99999;
-GO
+SELECT * FROM publicidad.Exhibicion
 
 
---=======================
--- Pruebas de Seleccion
---=======================
-
-PRINT 'PRUEBAS DE ALTA'
-
--- EXITO
-EXEC torneo.SP_Alta_Seleccion @Pais = 'Argentina', @Confederacion = 'CONMEBOL';
-EXEC torneo.SP_Alta_Seleccion @Pais = 'Brasil', @Confederacion = 'CONMEBOL';
-
--- EXITO para modificar y eliminar
-EXEC torneo.SP_Alta_Seleccion @Pais = 'Seleccion De Prueba', @Confederacion = 'Test';
-
--- FRACASO
-EXEC torneo.SP_Alta_Seleccion @Pais = '', @Confederacion = 'CONMEBOL';
-EXEC torneo.SP_Alta_Seleccion @Pais = 'Argentina', @Confederacion = '';
-EXEC torneo.SP_Alta_Seleccion @Pais = 'Argentina', @Confederacion = 'CONMEBOL';
-
-PRINT 'PRUEBAS DE MODIFICACIÓN'
-
-DECLARE @ID_Prueba INT = (SELECT SeleccionID FROM torneo.Seleccion WHERE Pais = 'Seleccion De Prueba');
-
--- EXITO
-EXEC torneo.SP_Modificacion_Seleccion 
-    @SeleccionID = @ID_Prueba, 
-    @Pais = 'Seleccion de Prueba Modificada', 
-    @Confederacion = 'Test modificado';
-
--- FRACASO
-EXEC torneo.SP_Modificacion_Seleccion 
-    @SeleccionID = 99999,
-    @Pais = 'Holanda', 
-    @Confederacion = 'UEFA'; 
-
-EXEC torneo.SP_Modificacion_Seleccion 
-    @SeleccionID = @ID_Prueba, 
-    @Pais = '',
-    @Confederacion = 'UEFA'; 
-
-EXEC torneo.SP_Modificacion_Seleccion 
-    @SeleccionID = @ID_Prueba, 
-    @Pais = 'Holanda',
-    @Confederacion = ''; 
-
-PRINT 'PRUEBAS DE BAJA'
-
--- EXITO:
-EXEC torneo.SP_Baja_Seleccion @SeleccionID = @ID_Prueba;
-
--- FRACASO
-EXEC torneo.SP_Baja_Seleccion @SeleccionID = 99999;
-GO
 
 
 --=================================
 -- Pruebas de CuentaConExhibicion
 --=================================
+
+SELECT * FROM publicidad.CuentaConExhibicion
 
 PRINT 'PRUEBAS DE ALTA'
 
@@ -1615,6 +1818,9 @@ EXEC publicidad.SP_Alta_CuentaConExhibicion @ExhibicionID = 1, @PartidoID = 1;
 
 PRINT 'PRUEBAS DE MODIFICACIÓN omitidas por ser una tabla de una relacion sin atributos propios'
 
+SELECT * FROM publicidad.CuentaConExhibicion
+
+
 PRINT 'PRUEBAS DE BAJA'
 
 -- ÉXITO:
@@ -1624,10 +1830,15 @@ EXEC publicidad.SP_Baja_CuentaConExhibicion @ExhibicionID = 2, @PartidoID = 2;
 EXEC publicidad.SP_Baja_CuentaConExhibicion @ExhibicionID = 99999, @PartidoID = 99999;
 GO
 
+SELECT * FROM publicidad.CuentaConExhibicion
+
 
 --=================================
 -- Tabla PersonaHabla
 --=================================
+
+SELECT * FROM torneo.PersonaHabla
+
 PRINT 'PRUEBAS DE ALTA'
 
 -- ÉXITO
@@ -1637,6 +1848,9 @@ EXEC torneo.SP_Alta_PersonaHabla @PersonaID = 1, @IdiomaID = 1;
 EXEC torneo.SP_Alta_PersonaHabla @PersonaID = 999999, @IdiomaID = 1;
 EXEC torneo.SP_Alta_PersonaHabla @PersonaID = 2, @IdiomaID = '';
 EXEC torneo.SP_Alta_PersonaHabla @PersonaID = 1, @IdiomaID = 1;
+
+
+SELECT * FROM torneo.PersonaHabla
 
 PRINT 'PRUEBAS DE BAJA'
 
@@ -1649,9 +1863,15 @@ EXEC torneo.SP_Baja_PersonaHabla @PersonaID = 1, @IdiomaID = 99999;
 GO
 
 
+SELECT * FROM torneo.PersonaHabla
+
+
 --=================================
 -- Tabla InteresPublicitario
 --=================================
+
+SELECT * FROM publicidad.InteresPublicitario
+
 PRINT 'PRUEBAS DE ALTA'
 
 -- ÉXITO
@@ -1661,6 +1881,9 @@ EXEC publicidad.SP_Alta_InteresPublicitario @AnuncianteID = 1, @PaisID = 1, @Pri
 EXEC publicidad.SP_Alta_InteresPublicitario @AnuncianteID = 99999, @PaisID = 1, @Prioridad = 'alta';
 EXEC publicidad.SP_Alta_InteresPublicitario @AnuncianteID = 1, @PaisID = 99999, @Prioridad = 'alta';
 EXEC publicidad.SP_Alta_InteresPublicitario @AnuncianteID = 1, @PaisID = 1, @Prioridad = '';
+
+
+SELECT * FROM publicidad.InteresPublicitario
 
 PRINT 'PRUEBAS DE MODIFICACIÓN'
 
@@ -1693,6 +1916,9 @@ EXEC publicidad.SP_Modificacion_InteresPublicitario
     @PaisID = 1,
     @Prioridad = '';
 
+
+SELECT * FROM publicidad.InteresPublicitario
+
 PRINT 'PRUEBAS DE BAJA'
 
 -- EXITO
@@ -1703,9 +1929,14 @@ EXEC publicidad.SP_Baja_InteresPublicitario @InteresID = 99999;
 GO
 
 
+SELECT * FROM publicidad.InteresPublicitario
+
+
 --=======================
 -- Pruebas de Participa
 --=======================
+
+SELECT * FROM torneo.Participa
 
 PRINT 'PRUEBAS DE ALTA'
 
@@ -1722,6 +1953,9 @@ EXEC torneo.SP_Alta_Participa @FormacionID = 1, @PersonaID = 99999, @Titular = 1
 EXEC torneo.SP_Alta_Participa @FormacionID = 1, @PersonaID = 1, @Titular = 1, @PosicionCancha = 'Arquero';
 EXEC torneo.SP_Alta_Participa @FormacionID = 2, @PersonaID = 2, @Titular = 1, @PosicionCancha = '';
 EXEC torneo.SP_Alta_Participa @FormacionID = 9999, @PersonaID = 9999, @Titular = 1, @PosicionCancha = 'Delantero';
+
+
+SELECT * FROM torneo.Participa
 
 PRINT 'PRUEBAS DE MODIFICACIÓN'
 
@@ -1751,6 +1985,9 @@ EXEC torneo.SP_Modificacion_Participa
     @Titular = 0, 
     @PosicionCancha = '';
 
+SELECT * FROM torneo.Participa
+
+
 PRINT 'PRUEBAS DE BAJA'
 
 -- ÉXITO:
@@ -1761,9 +1998,14 @@ EXEC torneo.SP_Baja_Participa @FormacionID = 99999, @PersonaID = 99999;
 GO
 
 
+SELECT * FROM torneo.Participa
+
+
 -- ==================
 -- Pruebas de Juega
 -- ==================
+
+SELECT * FROM torneo.Juega
 
 PRINT 'PRUEBAS DE ALTA'
 
@@ -1782,6 +2024,9 @@ EXEC torneo.SP_Alta_Juega @PartidoID = 9999, @SeleccionID = 99999;
 
 PRINT 'PRUEBAS DE MODIFICACIÓN omitidas por ser una tabla de una relacion sin atributos propios'
 
+
+SELECT * FROM torneo.Juega
+
 PRINT 'PRUEBAS DE BAJA'
 
 -- ÉXITO:
@@ -1792,9 +2037,15 @@ EXEC torneo.SP_Baja_Juega @PartidoID = 99999, @SeleccionID = 99999;
 GO
 
 
+SELECT * FROM torneo.Juega
+
+
 --=================================
 -- Tabla Gol 
 --=================================
+
+SELECT * FROM torneo.Gol
+
 PRINT 'PRUEBAS DE ALTA'
 
 -- ÉXITO
@@ -1803,6 +2054,8 @@ EXEC torneo.SP_Alta_Gol @PartidoID = 1, @PersonaID = 1, @AsistentePersonaID = 2,
 -- FRACASO
 EXEC torneo.SP_Alta_Gol @PartidoID = 999999, @PersonaID = 999999, @AsistentePersonaID = 999999, @Periodo = '', @Tipo = '', @Minuto = 0;
 
+
+SELECT * FROM torneo.Gol
 
 PRINT 'PRUEBAS DE MODIFICACIÓN'
 
@@ -1828,6 +2081,9 @@ EXEC torneo.SP_Modificacion_Gol
     @Tipo = '',
     @Minuto = NULL;
 
+
+SELECT * FROM torneo.Gol
+
 PRINT 'PRUEBAS DE BAJA'
 
 -- ÉXITO:
@@ -1838,9 +2094,14 @@ EXEC torneo.SP_Baja_Gol @GolID = 99999;
 GO
 
 
+SELECT * FROM torneo.Gol
+
+
 -- =====================
 -- Pruebas de Sancion
 -- =====================
+
+SELECT * FROM reglamento.Sancion
 
 PRINT 'PRUEBAS DE ALTA'
 
@@ -1855,6 +2116,9 @@ EXEC reglamento.SP_Alta_Sancion @Descripcion = 'Sancion de Prueba', @ArbitroID =
 EXEC reglamento.SP_Alta_Sancion @Descripcion = '', @ArbitroID = 1;
 EXEC reglamento.SP_Alta_Sancion @Descripcion = 'Advertencia', @ArbitroID = 99999;
 EXEC reglamento.SP_Alta_Sancion @Descripcion = '', @ArbitroID = 9999;
+
+
+SELECT * FROM reglamento.Sancion
 
 PRINT 'PRUEBAS DE MODIFICACIÓN'
 
@@ -1887,6 +2151,8 @@ EXEC reglamento.SP_Modificacion_Sancion
     @Descripcion = '', 
     @ArbitroID = 999999;
 
+SELECT * FROM reglamento.Sancion
+
 PRINT 'PRUEBAS DE BAJA'
 
 -- ÉXITO:
@@ -1897,9 +2163,16 @@ EXEC reglamento.SP_Baja_Sancion @SancionID = 9999;
 GO
 
 
+SELECT * FROM reglamento.Sancion
+
+
+
 --=================================
 -- Tabla TarjetaAsignada 
 --=================================
+
+SELECT * FROM reglamento.TarjetaAsignada
+
 PRINT 'PRUEBAS DE ALTA'
 
 -- ÉXITO
@@ -1908,6 +2181,8 @@ EXEC reglamento.SP_Alta_TarjetaAsignada @TarjetaID = 1, @PartidoID = 1, @Persona
 -- FRACASO
 EXEC reglamento.SP_Alta_TarjetaAsignada @TarjetaID = 9999999, @PartidoID = 99999, @PersonaID = 99999, @Minuto = 99999, @Motivo = '';
 
+
+SELECT * FROM reglamento.TarjetaAsignada
 
 PRINT 'PRUEBAS DE MODIFICACIÓN'
 
@@ -1931,6 +2206,9 @@ EXEC reglamento.SP_Modificacion_TarjetaAsignada
     @Minuto = 99999, 
     @Motivo = '';
 
+
+SELECT * FROM reglamento.TarjetaAsignada
+
 PRINT 'PRUEBAS DE BAJA'
 
 -- ÉXITO:
@@ -1941,9 +2219,15 @@ EXEC reglamento.SP_Baja_TarjetaAsignada @TarjetaAsignadaID = 99999;
 GO
 
 
+SELECT * FROM reglamento.TarjetaAsignada
+
+
+
 -- ========================
 -- Pruebas de Suspension
 -- ========================
+
+SELECT * FROM reglamento.Suspension
 
 PRINT 'PRUEBAS DE ALTA'
 
@@ -1959,6 +2243,9 @@ EXEC reglamento.SP_Alta_Suspension @PersonaID = 99999, @Motivo = 'Juego brusco',
 EXEC reglamento.SP_Alta_Suspension @PersonaID = 1, @Motivo = '', @PartidosSuspendido = 1;
 EXEC reglamento.SP_Alta_Suspension @PersonaID = 1, @Motivo = 'Reclamo', @PartidosSuspendido = 0;
 EXEC reglamento.SP_Alta_Suspension @PersonaID = 9999, @Motivo = '', @PartidosSuspendido = 0;
+
+
+SELECT * FROM reglamento.Suspension
 
 PRINT 'PRUEBAS DE MODIFICACIÓN'
 
@@ -1991,6 +2278,9 @@ EXEC reglamento.SP_Modificacion_Suspension
     @Motivo = '', 
     @PartidosSuspendido = -10;
 
+
+SELECT * FROM reglamento.Suspension
+
 PRINT 'PRUEBAS DE BAJA'
 
 -- ÉXITO
@@ -1999,3 +2289,6 @@ EXEC reglamento.SP_Baja_Suspension @SuspensionID = @ID_Suspension_Prueba;
 -- FRACASO
 EXEC reglamento.SP_Baja_Suspension @SuspensionID = 9999;
 GO
+
+
+SELECT * FROM reglamento.Suspension
