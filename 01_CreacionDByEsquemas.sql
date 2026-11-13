@@ -13,9 +13,6 @@
 use master
 go
 
-drop database DB_Mundial_2026
-go
-
 IF NOT EXISTS (SELECT name FROM master.dbo.sysdatabases WHERE name = 'DB_Mundial_2026')
 BEGIN
 	CREATE DATABASE DB_Mundial_2026
