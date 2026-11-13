@@ -39,6 +39,7 @@ GO
 -- ==================================================
 -- API: Consultar feriados
 -- ==================================================
+
 DECLARE @Resultado BIT;
 DECLARE @Descripcion VARCHAR(100);
 
@@ -107,3 +108,42 @@ SELECT Anio, Referee, AssistantReferees, FourthOfficial, ReserveFifthOfficial, V
 FROM torneo.FinalesArbitrosCompleto
 ORDER BY Anio ASC;
 GO
+
+--==========================
+-- IMPORTACION DE ARBITROS
+--==========================
+
+-- Antes de la importacion
+
+SELECT COUNT(*) AS TotalAntes FROM reglamento.Arbitro;
+
+DECLARE @RutaArbitros NVARCHAR(500) = 'C:\Importacion\referees.csv';
+EXEC reglamento.SP_ImportarArbitros_CSV @RutaArchivo = @RutaArbitros;
+GO
+
+-- Despues de la importacion
+
+SELECT COUNT(*) AS TotalDespues FROM reglamento.Arbitro;
+SELECT TOP 10 p.Nombre, p.Apellido, a.Pais, a.RolArbitral
+FROM reglamento.Arbitro a
+JOIN torneo.Persona p ON a.PersonaID = p.PersonaID;
+
+--==========================
+-- IMPORTACION DE JUGADORES
+--==========================
+
+-- Antes de la importacion
+
+SELECT COUNT(*) AS TotalPersonasAntes FROM torneo.Persona;
+SELECT COUNT(*) AS TotalJugadoresAntes FROM torneo.Jugador;
+
+DECLARE @RutaJugadores NVARCHAR(500) = 'C:\Importacion\players.csv';
+EXEC torneo.SP_ImportarJugadores_CSV @RutaArchivo = @RutaJugadores;
+GO
+
+-- Despues de la importacion
+
+SELECT COUNT(*) AS TotalPersonasDespues FROM torneo.Persona;
+SELECT TOP 10 PersonaID, Nombre, Apellido, FechaNacimiento
+FROM torneo.Persona
+ORDER BY PersonaID DESC;
