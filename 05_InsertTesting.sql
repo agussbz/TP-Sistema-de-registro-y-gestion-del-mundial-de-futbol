@@ -1117,7 +1117,7 @@ EXEC publicidad.SP_Alta_Campaña @nombre = 'Locos', @fechaInicio = '2026-05-01',
 EXEC publicidad.SP_Alta_Campaña @nombre = 'Soña en grande', @fechaInicio = '2026-06-01', @AnuncianteID = @ID_Anunciante_Camp;
 
 -- EXITO para modificar y eliminar
-EXEC publicidad.SP_Alta_Campaña @nombre = 'Aliento', @fechaInicio = '2026-06-15', @AnuncianteID = 4;
+EXEC publicidad.SP_Alta_Campaña @nombre = 'Aliento', @fechaInicio = '2026-06-15', @AnuncianteID = @ID_Anunciante_Camp;
 
 -- FRACASO
 EXEC publicidad.SP_Alta_Campaña @nombre = '', @fechaInicio = '2026-06-15', @AnuncianteID = @ID_Anunciante_Camp;
@@ -1415,7 +1415,7 @@ PRINT 'PRUEBAS DE BAJA'
 
 -- EXITO
 EXEC torneo.SP_Baja_TieneFormacion
-    @PartidoID = @ID_Partido_TF,
+    @PartidoID = @ID_Partido_TF_2,
     @FormacionID = @ID_Formacion_352;
 
 -- FRACASO: Asignacion inexistente

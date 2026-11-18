@@ -98,11 +98,11 @@ GO
 -- ==========================================
 -- torneo.SP_ReemplazoUltMomento_Convocatoria
 -- ==========================================
+
 PRINT '--- 2. SP_ReemplazoUltMomento_Convocatoria ---';
 
 DECLARE @ConvPrepID INT = (SELECT MIN(ConvocatoriaID) FROM torneo.Convocatoria);
 
--- 1) Persona y Jugador sin partidos ni goles que saldrá lesionado/reemplazado:
 IF NOT EXISTS (
     SELECT 1 FROM torneo.Jugador j
     WHERE NOT EXISTS (SELECT 1 FROM torneo.Participa pa WHERE pa.PersonaID = j.PersonaID)
@@ -114,34 +114,23 @@ BEGIN
     EXEC torneo.SP_Alta_Jugador @PersonaID = @ID_Dybala, @ClubOrigen = 'Roma', @Dorsal = 21, @PosicionHabitual = 'Delantero', @ConvocatoriaID = @ConvPrepID;
 END;
 
--- 2) Persona libre (que aún no es jugador) para entrar como reemplazo:
-IF NOT EXISTS (
-    SELECT 1 FROM torneo.Persona p
-    WHERE NOT EXISTS (SELECT 1 FROM torneo.Jugador j WHERE j.PersonaID = p.PersonaID)
-)
-BEGIN
-    EXEC torneo.SP_Alta_Persona @Nombre = 'Enzo', @Apellido = 'Fernandez', @FechaNacimiento = '2001-01-17';
-END;
+EXEC torneo.SP_Alta_Persona @Nombre = 'Jugador', @Apellido = 'ReemplazoTest', @FechaNacimiento = '2000-05-10';
+DECLARE @PersonaNuevaID INT = (SELECT MAX(PersonaID) FROM torneo.Persona WHERE Nombre = 'Jugador' AND Apellido = 'ReemplazoTest');
 
 SELECT 'ANTES - Jugador' AS Estado, * FROM torneo.Jugador;
 
-DECLARE @ConvID INT, @JugadorBajaID INT, @PersonaNuevaID INT, @DorsalOcupado INT;
+DECLARE @ConvID INT, @JugadorBajaID INT, @DorsalOcupado INT;
 
 SELECT TOP 1 @ConvID = j.ConvocatoriaID, @JugadorBajaID = j.PersonaID
 FROM torneo.Jugador j
 WHERE NOT EXISTS (SELECT 1 FROM torneo.Participa pa WHERE pa.PersonaID = j.PersonaID)
   AND NOT EXISTS (SELECT 1 FROM torneo.Gol g WHERE g.PersonaID = j.PersonaID)
+  AND j.PersonaID <> @PersonaNuevaID
 ORDER BY j.PersonaID DESC;
 
 SELECT TOP 1 @DorsalOcupado = Dorsal 
 FROM torneo.Jugador 
 WHERE ConvocatoriaID = @ConvID AND PersonaID <> @JugadorBajaID;
-
-SELECT TOP 1 @PersonaNuevaID = p.PersonaID
-FROM torneo.Persona p
-WHERE NOT EXISTS (SELECT 1 FROM torneo.Jugador j WHERE j.PersonaID = p.PersonaID)
-ORDER BY p.PersonaID DESC;
-
 
 -- VALIDACIONES DE ERROR
 -- Convocatoria o Jugador inexistente
@@ -167,7 +156,6 @@ BEGIN
     END CATCH;
 END;
 
-
 -- PRUEBA DE EXITO ALTA
 IF @ConvID IS NOT NULL AND @JugadorBajaID IS NOT NULL AND @PersonaNuevaID IS NOT NULL
 BEGIN
@@ -182,10 +170,8 @@ BEGIN
     END CATCH;
 END;
 
-
 SELECT 'DESPUÉS DEL ALTA - Jugador' AS Estado, * FROM torneo.Jugador WHERE ConvocatoriaID = @ConvID;
 GO
-
 
 -- =======================================
 -- torneo.SP_RegistrarAlineacion_Validada
