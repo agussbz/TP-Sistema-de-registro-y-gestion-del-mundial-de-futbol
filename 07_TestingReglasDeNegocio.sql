@@ -1,4 +1,3 @@
-
 -- Universidad: Universidad Nacional de La Matanza
 -- Materia: Base de Datos Aplicadas, COM 02
 -- Integrantes Grupo 3: 
@@ -18,7 +17,6 @@ GO
 -- =======================================
 
 PRINT '--- 1. SP_RegistrarPartidoCompleto ---';
-
 SELECT 'ANTES - Partido' AS Estado, * FROM torneo.Partido;
 SELECT 'ANTES - Juega' AS Estado, * FROM torneo.Juega;
 
@@ -96,20 +94,44 @@ BEGIN CATCH
 END CATCH;
 GO
 
+
 -- ==========================================
 -- torneo.SP_ReemplazoUltMomento_Convocatoria
 -- ==========================================
-
 PRINT '--- 2. SP_ReemplazoUltMomento_Convocatoria ---';
+
+DECLARE @ConvPrepID INT = (SELECT MIN(ConvocatoriaID) FROM torneo.Convocatoria);
+
+-- 1) Persona y Jugador sin partidos ni goles que saldrá lesionado/reemplazado:
+IF NOT EXISTS (
+    SELECT 1 FROM torneo.Jugador j
+    WHERE NOT EXISTS (SELECT 1 FROM torneo.Participa pa WHERE pa.PersonaID = j.PersonaID)
+      AND NOT EXISTS (SELECT 1 FROM torneo.Gol g WHERE g.PersonaID = j.PersonaID)
+)
+BEGIN
+    EXEC torneo.SP_Alta_Persona @Nombre = 'Paulo', @Apellido = 'Dybala', @FechaNacimiento = '1993-11-15';
+    DECLARE @ID_Dybala INT = (SELECT MAX(PersonaID) FROM torneo.Persona WHERE Nombre = 'Paulo' AND Apellido = 'Dybala');
+    EXEC torneo.SP_Alta_Jugador @PersonaID = @ID_Dybala, @ClubOrigen = 'Roma', @Dorsal = 21, @PosicionHabitual = 'Delantero', @ConvocatoriaID = @ConvPrepID;
+END;
+
+-- 2) Persona libre (que aún no es jugador) para entrar como reemplazo:
+IF NOT EXISTS (
+    SELECT 1 FROM torneo.Persona p
+    WHERE NOT EXISTS (SELECT 1 FROM torneo.Jugador j WHERE j.PersonaID = p.PersonaID)
+)
+BEGIN
+    EXEC torneo.SP_Alta_Persona @Nombre = 'Enzo', @Apellido = 'Fernandez', @FechaNacimiento = '2001-01-17';
+END;
+
 SELECT 'ANTES - Jugador' AS Estado, * FROM torneo.Jugador;
 
-DECLARE @ConvID INT, @JugadorBajaID INT, @PersonaNuevaID INT, @DorsalOcupado INT, @JugadorConPartidosID INT;
+DECLARE @ConvID INT, @JugadorBajaID INT, @PersonaNuevaID INT, @DorsalOcupado INT;
 
 SELECT TOP 1 @ConvID = j.ConvocatoriaID, @JugadorBajaID = j.PersonaID
 FROM torneo.Jugador j
 WHERE NOT EXISTS (SELECT 1 FROM torneo.Participa pa WHERE pa.PersonaID = j.PersonaID)
   AND NOT EXISTS (SELECT 1 FROM torneo.Gol g WHERE g.PersonaID = j.PersonaID)
-ORDER BY j.ConvocatoriaID;
+ORDER BY j.PersonaID DESC;
 
 SELECT TOP 1 @DorsalOcupado = Dorsal 
 FROM torneo.Jugador 
@@ -119,6 +141,7 @@ SELECT TOP 1 @PersonaNuevaID = p.PersonaID
 FROM torneo.Persona p
 WHERE NOT EXISTS (SELECT 1 FROM torneo.Jugador j WHERE j.PersonaID = p.PersonaID)
 ORDER BY p.PersonaID DESC;
+
 
 -- VALIDACIONES DE ERROR
 -- Convocatoria o Jugador inexistente
@@ -144,20 +167,21 @@ BEGIN
     END CATCH;
 END;
 
--- PRUEBA DE EXITO ALTA
 
+-- PRUEBA DE EXITO ALTA
 IF @ConvID IS NOT NULL AND @JugadorBajaID IS NOT NULL AND @PersonaNuevaID IS NOT NULL
 BEGIN
     BEGIN TRY
         EXEC torneo.SP_ReemplazoUltMomento_Convocatoria
             @ConvocatoriaID = @ConvID, @PersonaBajaID = @JugadorBajaID, @PersonaAltaID = @PersonaNuevaID,
-            @ClubOrigenAlta = 'Club Reemplazo OK', @DorsalAlta = 99, @PosicionHabitualAlta = 'Delantero';
+            @ClubOrigenAlta = 'Chelsea', @DorsalAlta = 24, @PosicionHabitualAlta = 'Mediocampista';
         PRINT 'EXITO: Reemplazo de convocatoria ejecutado correctamente.';
     END TRY
     BEGIN CATCH
         PRINT ERROR_MESSAGE();
     END CATCH;
 END;
+
 
 SELECT 'DESPUÉS DEL ALTA - Jugador' AS Estado, * FROM torneo.Jugador WHERE ConvocatoriaID = @ConvID;
 GO
@@ -173,9 +197,22 @@ SELECT 'ANTES - Participa' AS Estado, * FROM torneo.Participa;
 DECLARE @FormacionID INT, @JugadorValidoID INT, @JugadorYaAlineadoID INT;
 SELECT TOP 1 @FormacionID = FormacionID FROM torneo.Formacion ORDER BY FormacionID;
 
+-- Si por algún motivo todos los jugadores están suspendidos o ya alineados en esta formación,
+-- aseguramos un jugador habilitado para poder demostrar el caso de éxito:
+IF NOT EXISTS (
+    SELECT 1 FROM torneo.Jugador j
+    WHERE NOT EXISTS (SELECT 1 FROM reglamento.Suspension s WHERE s.PersonaID = j.PersonaID AND s.PartidosSuspendido > 0)
+      AND NOT EXISTS (SELECT 1 FROM torneo.Participa pa WHERE pa.FormacionID = @FormacionID AND pa.PersonaID = j.PersonaID)
+)
+BEGIN
+    DECLARE @ConvAlineacion INT = (SELECT MIN(ConvocatoriaID) FROM torneo.Convocatoria);
+    EXEC torneo.SP_Alta_Persona @Nombre = 'Alexis', @Apellido = 'Mac Allister', @FechaNacimiento = '1998-12-24';
+    DECLARE @ID_Alexis INT = (SELECT MAX(PersonaID) FROM torneo.Persona WHERE Nombre = 'Alexis' AND Apellido = 'Mac Allister');
+    EXEC torneo.SP_Alta_Jugador @PersonaID = @ID_Alexis, @ClubOrigen = 'Liverpool', @Dorsal = 20, @PosicionHabitual = 'Mediocampista', @ConvocatoriaID = @ConvAlineacion;
+END;
+
 -- VALIDACIONES DE ERROR
 -- Formación inexistente
-
 BEGIN TRY
     EXEC torneo.SP_RegistrarAlineacion_Validada 
         @FormacionID = -999, @PersonaID = 1, @Titular = 1, @PosicionCancha = 'Defensor';
@@ -184,8 +221,8 @@ BEGIN CATCH
     PRINT ERROR_MESSAGE();
 END CATCH;
 
--- Jugador ya registrado en esa misma formación
 
+-- Jugador ya registrado en esa misma formación
 SELECT TOP 1 @FormacionID = FormacionID, @JugadorYaAlineadoID = PersonaID FROM torneo.Participa;
 IF @JugadorYaAlineadoID IS NOT NULL
 BEGIN
@@ -198,8 +235,8 @@ BEGIN
     END CATCH;
 END;
 
--- PRUEBA DE EXITO ALTA
 
+-- PRUEBA DE EXITO ALTA
 SELECT TOP 1 @JugadorValidoID = j.PersonaID
 FROM torneo.Jugador j
 WHERE NOT EXISTS (SELECT 1 FROM reglamento.Suspension s WHERE s.PersonaID = j.PersonaID AND s.PartidosSuspendido > 0)
@@ -217,8 +254,10 @@ BEGIN
     END CATCH;
 END;
 
+
 SELECT 'DESPUÉS DEL ALTA - Participa' AS Estado, * FROM torneo.Participa WHERE FormacionID = @FormacionID;
 GO
+
 
 -- =======================================
 -- torneo.SP_RegistrarCambioPartido
@@ -240,33 +279,30 @@ WHERE j3.ConvocatoriaID <> (SELECT ConvocatoriaID FROM torneo.Jugador WHERE Pers
 
 -- VALIDACIONES DE ERROR
 -- El mismo jugador entra y sale
-
 BEGIN TRY
     EXEC torneo.SP_RegistrarCambioPartido 
         @PartidoID = @PartidoID, @JugadorSaleID = @SaleID, @JugadorEntraID = @SaleID,
-        @NumeroVentana = 1, @Minuto = 55, @Motivo = 'Táctico';
+        @NumeroVentana = 1, @Minuto = 55, @Motivo = 'Tactico';
 END TRY
 BEGIN CATCH
     PRINT ERROR_MESSAGE();
 END CATCH;
 
 -- Número de ventana inválido (> 3)
-
 BEGIN TRY
     EXEC torneo.SP_RegistrarCambioPartido 
         @PartidoID = @PartidoID, @JugadorSaleID = @SaleID, @JugadorEntraID = @EntraID,
-        @NumeroVentana = 99, @Minuto = 55, @Motivo = 'Táctico';
+        @NumeroVentana = 99, @Minuto = 55, @Motivo = 'Tactico';
 END TRY
 BEGIN CATCH
     PRINT ERROR_MESSAGE();
 END CATCH;
 
 -- PRUEBA DE EXITO ALTA
-
 BEGIN TRY
     EXEC torneo.SP_RegistrarCambioPartido 
         @PartidoID = @PartidoID, @JugadorSaleID = @SaleID, @JugadorEntraID = @EntraID,
-        @NumeroVentana = 1, @Minuto = 65, @Motivo = 'Táctico';
+        @NumeroVentana = 1, @Minuto = 65, @Motivo = 'Tactico';
     PRINT 'EXITO: Sustitución registrada correctamente.';
 END TRY
 BEGIN CATCH
@@ -275,6 +311,7 @@ END CATCH;
 
 SELECT 'DESPUÉS DEL ALTA - Sustitucion' AS Estado, * FROM torneo.Sustitucion;
 GO
+
 
 -- ============================================
 -- torneo.SP_RegistrarGol_Y_ActualizarResultado
@@ -293,41 +330,43 @@ SELECT 'ANTES - Marcador Partido' AS Estado, PartidoID, Fase, ResultadoFinal FRO
 
 -- VALIDACIONES DE ERROR
 -- Minuto fuera de rango (negativo)
-
 BEGIN TRY
     EXEC torneo.SP_RegistrarGol_Y_ActualizarResultado 
         @PartidoID = @PartidoGolID, @PersonaID = @GoleadorValidoID,
-        @AsistentePersonaID = NULL, @Periodo = 'Primer Tiempo', @Tipo = 'Jugada', @Minuto = -10;
+        @AsistentePersonaID = NULL, @Periodo = 'Primer tiempo', @Tipo = 'Jugada', @Minuto = -10;
 END TRY
 BEGIN CATCH
     PRINT ERROR_MESSAGE();
 END CATCH;
+
 
 -- Goleador y Asistente son la misma persona
 BEGIN TRY
     EXEC torneo.SP_RegistrarGol_Y_ActualizarResultado 
         @PartidoID = @PartidoGolID, @PersonaID = @GoleadorValidoID,
-        @AsistentePersonaID = @GoleadorValidoID, @Periodo = 'Primer Tiempo', @Tipo = 'Jugada', @Minuto = 20;
+        @AsistentePersonaID = @GoleadorValidoID, @Periodo = 'Primer tiempo', @Tipo = 'Jugada', @Minuto = 20;
 END TRY
 BEGIN CATCH
     PRINT ERROR_MESSAGE();
 END CATCH;
 
--- PRUEBA DE EXITO ALTA
 
+-- PRUEBA DE EXITO ALTA
 BEGIN TRY
     EXEC torneo.SP_RegistrarGol_Y_ActualizarResultado 
         @PartidoID = @PartidoGolID, @PersonaID = @GoleadorValidoID,
-        @AsistentePersonaID = NULL, @Periodo = 'Primer Tiempo', @Tipo = 'Jugada', @Minuto = 25;
+        @AsistentePersonaID = NULL, @Periodo = 'Primer tiempo', @Tipo = 'Jugada', @Minuto = 25;
     PRINT 'EXITO: Gol insertado y ResultadoFinal actualizado en Partido.';
 END TRY
 BEGIN CATCH
     PRINT ERROR_MESSAGE();
 END CATCH;
 
+
 SELECT 'DESPUÉS DEL ALTA - Gol' AS Estado, * FROM torneo.Gol WHERE PartidoID = @PartidoGolID;
 SELECT 'DESPUÉS DEL ALTA - Marcador Partido' AS Estado, PartidoID, Fase, ResultadoFinal FROM torneo.Partido WHERE PartidoID = @PartidoGolID;
 GO
+
 
 -- ===========================================
 -- reglamento.SP_ProcesarTarjeta_Y_Suspension
@@ -346,7 +385,6 @@ SELECT TOP 1 @JugadorTarjetaID = PersonaID FROM torneo.Jugador ORDER BY PersonaI
 
 -- VALIDACIONES DE ERROR
 -- Tarjeta inexistente
-
 BEGIN TRY
     EXEC reglamento.SP_ProcesarTarjeta_Y_Suspension 
         @TarjetaID = -999, @PartidoID = @PartidoTarjetaID, @PersonaID = @JugadorTarjetaID, 
@@ -371,6 +409,7 @@ SELECT 'DESPUÉS DEL ALTA - TarjetaAsignada' AS Estado, * FROM reglamento.Tarjet
 SELECT 'DESPUÉS DEL ALTA - Suspension' AS Estado, * FROM reglamento.Suspension;
 GO
 
+
 -- ===========================================
 -- reglamento.SP_DesignarArbitro_SinConflicto
 -- ===========================================
@@ -379,9 +418,12 @@ PRINT '--- 7. SP_DesignarArbitro_SinConflicto ---';
 SELECT 'ANTES - SeDesignaArbitro' AS Estado, * FROM reglamento.SeDesignaArbitro;
 
 DECLARE @PartidoArbID INT, @ArbitroNeutralID INT, @ArbitroConConflictoID INT;
+
+-- Buscamos el partido creado en el Módulo 1 (que aún no tiene árbitros asignados y tiene 2 selecciones en Juega)
 SELECT TOP 1 @PartidoArbID = p.PartidoID
 FROM torneo.Partido p
-WHERE (SELECT COUNT(*) FROM torneo.Juega j WHERE j.PartidoID = p.PartidoID) >= 2;
+WHERE (SELECT COUNT(*) FROM torneo.Juega j WHERE j.PartidoID = p.PartidoID) >= 2
+ORDER BY p.PartidoID DESC;
 
 SELECT TOP 1 @ArbitroConConflictoID = a.PersonaID
 FROM reglamento.Arbitro a
@@ -398,7 +440,7 @@ WHERE NOT EXISTS (
 )
 AND NOT EXISTS (
     SELECT 1 FROM reglamento.SeDesignaArbitro sda
-    WHERE sda.PartidoID = @PartidoArbID AND sda.PersonaID = a.PersonaID
+    WHERE sda.PartidoID = @PartidoArbID AND sda.ArbitroID= a.PersonaID
 );
 
 -- VALIDACIONES DE ERROR
@@ -432,11 +474,26 @@ END;
 SELECT 'DESPUÉS DEL ALTA - SeDesignaArbitro' AS Estado, * FROM reglamento.SeDesignaArbitro WHERE PartidoID = @PartidoArbID;
 GO
 
+
 -- ============================================
 -- publicidad.SP_AsignarCuatroPiezasPorPartido
 -- =============================================
 
 PRINT '--- 8. SP_AsignarCuatroPiezasPorPartido ---';
+
+-- El Script 4 deja solo 2 registros en publicidad.Exhibicion.
+-- Aseguramos que existan al menos 4 exhibiciones en la tabla para que el SP pueda asignar las 4 piezas:
+DECLARE @CantExhibiciones INT = (SELECT COUNT(*) FROM publicidad.Exhibicion);
+DECLARE @PiezaBaseID INT = (SELECT MIN(PiezaID) FROM publicidad.PiezaPublicitaria);
+
+WHILE @CantExhibiciones < 4 AND @PiezaBaseID IS NOT NULL
+BEGIN
+    EXEC publicidad.SP_Alta_Exhibicion 
+        @Espacio = 'Panel LED Cabecera', 
+        @PiezaID = @PiezaBaseID, 
+        @Costo = 40000;
+    SET @CantExhibiciones = (SELECT COUNT(*) FROM publicidad.Exhibicion);
+END;
 
 DECLARE @PartidoPubID INT;
 SELECT TOP 1 @PartidoPubID = p.PartidoID
@@ -479,74 +536,3 @@ BEGIN
     END CATCH;
 END;
 GO
-
--- Consultas de ejemplo
-
--- Jugadores que recibieron tarjetas amarillas
-SELECT per.Nombre, per.Apellido, s.Pais AS Seleccion, ta.Minuto, ta.Motivo, p.PartidoID
-FROM reglamento.TarjetaAsignada ta
-INNER JOIN reglamento.Tarjeta t
-    ON ta.TarjetaID = t.TarjetaID
-INNER JOIN torneo.Jugador j
-    ON ta.PersonaID = j.PersonaID
-INNER JOIN torneo.Persona per
-    ON j.PersonaID = per.PersonaID
-INNER JOIN torneo.Convocatoria c
-    ON j.ConvocatoriaID = c.ConvocatoriaID
-INNER JOIN torneo.Seleccion s
-    ON c.SeleccionID = s.SeleccionID
-INNER JOIN torneo.Partido p
-    ON ta.PartidoID = p.PartidoID
-WHERE t.Tipo = 'Amarilla'
-ORDER BY p.PartidoID, ta.Minuto;
-
--- Jugadores que hicieron goles
-SELECT per.Nombre, per.Apellido, s.Pais AS Seleccion, g.Minuto, g.Periodo, g.Tipo, p.ResultadoFinal
-FROM torneo.Gol g
-INNER JOIN torneo.Jugador j
-    ON g.PersonaID = j.PersonaID
-INNER JOIN torneo.Persona per
-    ON j.PersonaID = per.PersonaID
-INNER JOIN torneo.Convocatoria c
-    ON j.ConvocatoriaID = c.ConvocatoriaID
-INNER JOIN torneo.Seleccion s
-    ON c.SeleccionID = s.SeleccionID
-INNER JOIN torneo.Partido p
-    ON g.PartidoID = p.PartidoID
-ORDER BY p.PartidoID, g.Minuto;
-
-
--- Partidos con sus selecciones y sede
-SELECT p.PartidoID, s1.Pais AS SeleccionLocal, s2.Pais AS SeleccionVisitante, p.ResultadoFinal, p.Fase, se.NombreEstadio, se.Ciudad
-FROM torneo.Partido p
-INNER JOIN torneo.Juega j1
-    ON p.PartidoID = j1.PartidoID
-INNER JOIN torneo.Juega j2
-    ON p.PartidoID = j2.PartidoID
-   AND j1.SeleccionID < j2.SeleccionID
-INNER JOIN torneo.Seleccion s1
-    ON j1.SeleccionID = s1.SeleccionID
-INNER JOIN torneo.Seleccion s2
-    ON j2.SeleccionID = s2.SeleccionID
-INNER JOIN torneo.Sede se
-    ON p.SedeID = se.SedeID
-ORDER BY p.PartidoID;
-
-
-
--- Publicidad exhibida en cada partido
-SELECT p.PartidoID, se.NombreEstadio, ex.Espacio, pp.Contenido, ca.Nombre AS Campaña, a.Pais AS PaisAnunciante, ex.Costo
-FROM publicidad.CuentaConExhibicion ce
-INNER JOIN publicidad.Exhibicion ex
-    ON ce.ExhibicionID = ex.ExhibicionID
-INNER JOIN publicidad.PiezaPublicitaria pp
-    ON ex.PiezaID = pp.PiezaID
-INNER JOIN publicidad.Campaña ca
-    ON pp.CampañaID = ca.CampañaID
-INNER JOIN publicidad.Anunciante a
-    ON ca.AnuncianteID = a.AnuncianteID
-INNER JOIN torneo.Partido p
-    ON ce.PartidoID = p.PartidoID
-INNER JOIN torneo.Sede se
-    ON p.SedeID = se.SedeID
-ORDER BY p.PartidoID, ex.Espacio;

@@ -741,7 +741,10 @@ BEGIN
         SET @mensajeError = 'El id del arbitro no tiene que ser nulo. ';
 
     IF LTRIM(RTRIM(@Pais)) = ''
-        SET @mensajeError = 'El nombre del pais es obligatorio. ';
+        SET @mensajeError = @mensajeError + 'El nombre del pais es obligatorio. ';
+    
+    IF EXISTS (SELECT 1 FROM reglamento.Arbitro WHERE PersonaID = @PersonaID)
+	    SET @mensajeError = @mensajeError + 'El arbitro ya se encuentra rergistrado. '
 
     IF LTRIM(RTRIM(@RolArbitral)) = ''
         SET @mensajeError = @mensajeError + 'El rol del arbitro es obligatorio. ';

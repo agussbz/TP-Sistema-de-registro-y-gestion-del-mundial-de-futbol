@@ -19,7 +19,7 @@ GO
 DECLARE @Resultado DECIMAL(18,2);
 
 EXEC publicidad.ConvertirMonedaAUSD
-    @Monto = 15370.10, 
+    @Monto = 45000.0, 
     @MonedaOrigen = 'ARS', 
     @MontoConvertido = @Resultado OUTPUT;
 
@@ -109,6 +109,96 @@ FROM torneo.FinalesArbitrosCompleto
 ORDER BY Anio ASC;
 GO
 
+-- ============================================
+-- PRUEBA DE EXITO - INSERTAR UN AÑO NUEVO
+-- ============================================
+BEGIN TRY
+    INSERT INTO torneo.FinalesArbitrosCompleto
+    (
+        Anio,
+        Referee,
+        AssistantReferees,
+        FourthOfficial,
+        ReserveFifthOfficial,
+        VARAndAssistantVARs
+    )
+    VALUES
+    (
+        2030,
+        'Arbitro de Prueba',
+        'Asistente 1, Asistente 2',
+        'Cuarto Arbitro',
+        'Quinto Arbitro',
+        'VAR de Prueba'
+    );
+
+    PRINT 'EXITO: Se inserto una final nueva.';
+END TRY
+BEGIN CATCH
+    PRINT 'ERROR: ' + ERROR_MESSAGE();
+END CATCH;
+GO
+
+
+-- ============================================
+-- PRUEBA DE FRACASO - AÑO YA EXISTENTE
+-- ============================================
+DECLARE @AnioExistente INT;
+
+SELECT TOP 1 @AnioExistente = Anio
+FROM torneo.FinalesArbitrosCompleto
+ORDER BY Anio;
+
+BEGIN TRY
+    INSERT INTO torneo.FinalesArbitrosCompleto
+    (
+        Anio,
+        Referee,
+        AssistantReferees
+    )
+    VALUES
+    (
+        @AnioExistente,
+        'Arbitro Duplicado',
+        'Asistente Duplicado'
+    );
+
+    PRINT 'FALLO: Se permitio insertar un año duplicado.';
+END TRY
+BEGIN CATCH
+    PRINT 'EXITO: Se bloqueo el año duplicado.';
+    PRINT 'ERROR: ' + ERROR_MESSAGE();
+END CATCH;
+GO
+
+-- ============================================
+-- PRUEBA DE EXITO - ELIMINAR FINAL AGREGADA
+-- ============================================
+BEGIN TRY
+    DELETE FROM torneo.FinalesArbitrosCompleto
+    WHERE Anio = 2030
+      AND Referee = 'Arbitro de Prueba';
+
+    IF @@ROWCOUNT > 0
+        PRINT 'EXITO: Se elimino la final de prueba del año 2030.';
+    ELSE
+        PRINT 'AVISO: No se encontro la final de prueba.';
+END TRY
+BEGIN CATCH
+    PRINT 'ERROR: ' + ERROR_MESSAGE();
+END CATCH;
+GO
+
+-- ============================================
+-- VERIFICAR RESULTADOS
+-- ============================================
+SELECT *
+FROM torneo.FinalesArbitrosCompleto
+ORDER BY Anio DESC;
+GO
+
+
+
 --==========================
 -- IMPORTACION DE ARBITROS
 --==========================
@@ -127,6 +217,8 @@ SELECT COUNT(*) AS TotalDespues FROM reglamento.Arbitro;
 SELECT TOP 10 p.Nombre, p.Apellido, a.Pais, a.RolArbitral
 FROM reglamento.Arbitro a
 JOIN torneo.Persona p ON a.PersonaID = p.PersonaID;
+
+EXEC reglamento.SP_Alta_Arbitro @PersonaID = 12, @Pais = 'Colombia', @RolArbitral = 'Asistente';
 
 --==========================
 -- IMPORTACION DE JUGADORES
@@ -147,3 +239,9 @@ SELECT COUNT(*) AS TotalPersonasDespues FROM torneo.Persona;
 SELECT TOP 10 PersonaID, Nombre, Apellido, FechaNacimiento
 FROM torneo.Persona
 ORDER BY PersonaID DESC;
+
+select*
+
+from torneo.Jugador;
+
+EXEC torneo.SP_Alta_Jugador @PersonaID = 10, @ClubOrigen = 'Liverpool', @Dorsal = 7 ,@PosicionHabitual = 'Delantero', @ConvocatoriaID = 1;
