@@ -1,0 +1,220 @@
+
+-- Universidad: Universidad Nacional de La Matanza
+-- Materia: Base de Datos Aplicadas, COM 02
+-- Integrantes Grupo 3:
+-- Borfitz, Maia Agustina
+-- Gomez, Erin Agustina
+-- Pereyra Almanza, Ignacio Raul
+-- Meynet, Mauro Fernando
+
+-- Objetivo: Stored Procedures de Reportes
+
+USE DB_Mundial_2026;
+GO
+
+-- ============================================
+-- CIFRADO DE DATOS PERSONALES
+-- 01. CREACION DE CLAVES Y CERTIFICADO
+-- ============================================
+
+-- 1. Crear Master Key
+IF NOT EXISTS (SELECT 1 FROM sys.symmetric_keys WHERE name = '##MS_DatabaseMasterKey##')
+BEGIN
+    CREATE MASTER KEY
+    ENCRYPTION BY PASSWORD = 'Mundial2026_MasterKey';
+END
+GO
+
+-- 2. Crear certificado
+IF NOT EXISTS (SELECT 1 FROM sys.certificates WHERE name = 'Certificado_Persona')
+BEGIN
+    CREATE CERTIFICATE Certificado_Persona
+    WITH SUBJECT = 'Certificado para proteger datos personales';
+END
+GO
+
+-- 3. Crear clave simetrica
+IF NOT EXISTS (SELECT 1 FROM sys.symmetric_keys WHERE name = 'ClaveSimetrica_Persona')
+BEGIN
+    CREATE SYMMETRIC KEY ClaveSimetrica_Persona
+    WITH ALGORITHM = AES_256
+    ENCRYPTION BY CERTIFICATE Certificado_Persona;
+END
+GO
+
+PRINT 'Infraestructura de cifrado creada correctamente.';
+GO
+
+-- Muesto que la clave se genero correctamente
+OPEN SYMMETRIC KEY ClaveSimetrica_Persona
+DECRYPTION BY CERTIFICATE Certificado_Persona;
+GO
+
+SELECT
+    KEY_NAME,
+    KEY_GUID
+FROM sys.openkeys
+WHERE KEY_NAME = 'ClaveSimetrica_Persona';
+GO
+
+CLOSE SYMMETRIC KEY ClaveSimetrica_Persona;
+GO
+
+-- Modifico la tabla de persona
+IF COL_LENGTH('torneo.Persona', 'Nombre_Cifrado') IS NULL
+    ALTER TABLE torneo.Persona
+    ADD Nombre_Cifrado VARBINARY(256) NULL;
+GO
+
+IF COL_LENGTH('torneo.Persona', 'Apellido_Cifrado') IS NULL
+    ALTER TABLE torneo.Persona
+    ADD Apellido_Cifrado VARBINARY(256) NULL;
+GO
+
+IF COL_LENGTH('torneo.Persona', 'FechaNacimiento_Cifrada') IS NULL
+    ALTER TABLE torneo.Persona
+    ADD FechaNacimiento_Cifrada VARBINARY(256) NULL;
+GO
+
+SELECT
+    COLUMN_NAME,
+    DATA_TYPE,
+    IS_NULLABLE
+FROM INFORMATION_SCHEMA.COLUMNS
+WHERE TABLE_SCHEMA = 'torneo'
+  AND TABLE_NAME = 'Persona';
+
+-- Tabla persona antes de cifrar los datos sensibles
+SELECT *
+FROM torneo.Persona;
+
+-- Realizo el cifrado sobre los datos
+BEGIN TRY
+    OPEN SYMMETRIC KEY ClaveSimetrica_Persona
+    DECRYPTION BY CERTIFICATE Certificado_Persona;
+
+    BEGIN TRANSACTION;
+
+    UPDATE torneo.Persona
+    SET
+        Nombre_Cifrado = EncryptByKey(Key_GUID('ClaveSimetrica_Persona'), CONVERT(VARBINARY(100), Nombre), 1, CONVERT(VARBINARY(4), PersonaID)),
+
+        Apellido_Cifrado = EncryptByKey(Key_GUID('ClaveSimetrica_Persona'), CONVERT(VARBINARY(100), Apellido), 1, CONVERT(VARBINARY(4), PersonaID)),
+
+        FechaNacimiento_Cifrada = EncryptByKey( Key_GUID('ClaveSimetrica_Persona'), CONVERT(VARBINARY(10), CONVERT(VARCHAR(10), FechaNacimiento, 23)),  
+        1, CONVERT(VARBINARY(4), PersonaID));
+
+    IF EXISTS (
+        SELECT 1
+        FROM torneo.Persona
+        WHERE
+            Nombre_Cifrado IS NULL
+            OR Apellido_Cifrado IS NULL
+            OR FechaNacimiento_Cifrada IS NULL
+
+            OR CONVERT(VARCHAR(50), DecryptByKey(Nombre_Cifrado, 1, CONVERT(VARBINARY(4), PersonaID))) <> Nombre
+
+            OR CONVERT(VARCHAR(50), DecryptByKey(Apellido_Cifrado, 1, CONVERT(VARBINARY(4), PersonaID))) <> Apellido
+
+            OR CONVERT(DATE, CONVERT(VARCHAR(10), DecryptByKey(FechaNacimiento_Cifrada, 1, CONVERT(VARBINARY(4), PersonaID))), 23) <> FechaNacimiento
+    )
+    BEGIN
+        THROW 50001,
+            'Error: la validacion del cifrado de Persona fallo.',
+            1;
+    END;
+
+    COMMIT TRANSACTION;
+
+    CLOSE SYMMETRIC KEY ClaveSimetrica_Persona;
+
+    PRINT 'Migracion completada correctamente.';
+    PRINT 'Todos los datos cifrados fueron validados.';
+
+END TRY
+BEGIN CATCH
+
+    IF @@TRANCOUNT > 0
+        ROLLBACK TRANSACTION;
+
+    IF EXISTS (SELECT 1 FROM sys.openkeys WHERE KEY_NAME = 'ClaveSimetrica_Persona')
+        CLOSE SYMMETRIC KEY ClaveSimetrica_Persona;
+    THROW;
+END CATCH;
+GO
+
+
+-- Tabla persona despues del cifrado
+SELECT
+    PersonaID,
+    Nombre,
+    Nombre_Cifrado,
+    Apellido,
+    Apellido_Cifrado,
+    FechaNacimiento,
+    FechaNacimiento_Cifrada
+FROM torneo.Persona;
+
+-- Eliminamos los campos por los campos cifrados
+BEGIN TRY
+    BEGIN TRANSACTION;
+    ALTER TABLE torneo.Persona
+    DROP COLUMN Nombre, Apellido, FechaNacimiento;
+
+    EXEC sp_rename
+        'torneo.Persona.Nombre_Cifrado', 'Nombre', 'COLUMN';
+
+    EXEC sp_rename
+        'torneo.Persona.Apellido_Cifrado', 'Apellido', 'COLUMN';
+
+    EXEC sp_rename
+        'torneo.Persona.FechaNacimiento_Cifrada', 'FechaNacimiento', 'COLUMN';
+
+    ALTER TABLE torneo.Persona
+    ALTER COLUMN Nombre VARBINARY(256) NOT NULL;
+
+    ALTER TABLE torneo.Persona
+    ALTER COLUMN Apellido VARBINARY(256) NOT NULL;
+
+    ALTER TABLE torneo.Persona
+    ALTER COLUMN FechaNacimiento VARBINARY(256) NOT NULL;
+
+    COMMIT TRANSACTION;
+
+    PRINT 'Columnas originales eliminadas correctamente.';
+    PRINT 'La tabla Persona ahora almacena los datos personales cifrados.';
+
+END TRY
+BEGIN CATCH
+
+    IF @@TRANCOUNT > 0
+        ROLLBACK TRANSACTION;
+
+    THROW;
+
+END CATCH;
+GO
+
+-- Tabla despues de eliminar los campos con los datos crudos y se modifican los campos cifrados
+SELECT *
+FROM torneo.Persona;
+
+-- Muestro los datos descifrados
+CREATE OR ALTER VIEW torneo.VW_Persona_Descifrada
+AS
+SELECT
+    PersonaID,
+    CONVERT(VARCHAR(50), DecryptByKey(Nombre, 1, CONVERT(VARBINARY(4), PersonaID))) AS Nombre,
+    CONVERT(VARCHAR(50), DecryptByKey(Apellido, 1, CONVERT(VARBINARY(4), PersonaID))) AS Apellido,
+    CONVERT(DATE, CONVERT(VARCHAR(10), DecryptByKey(FechaNacimiento, 1, CONVERT(VARBINARY(4), PersonaID))), 23) AS FechaNacimiento
+FROM torneo.Persona;
+GO
+
+OPEN SYMMETRIC KEY ClaveSimetrica_Persona
+DECRYPTION BY CERTIFICATE Certificado_Persona;
+
+SELECT *
+FROM torneo.VW_Persona_Descifrada;
+
+CLOSE SYMMETRIC KEY ClaveSimetrica_Persona;
+
