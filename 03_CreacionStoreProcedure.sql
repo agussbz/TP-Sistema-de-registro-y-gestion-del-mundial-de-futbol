@@ -559,7 +559,7 @@ END
 GO
 
 -- ============================
--- PLANTILLA ABM: Tabla IDIOMA
+-- PLANTILLA ABM: Tabla IDIOMAe
 -- ============================
 
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Idioma
@@ -575,7 +575,7 @@ BEGIN
     IF EXISTS (SELECT 1 FROM torneo.Idioma WHERE Nombre = @nombre)
         SET @mensajeError = 'El idioma ya se encuentra registrado. ';
 
-    IF LEN(@mensajeError) > 0
+    IF LEN(@mensajeError) > 0e
     BEGIN
         RAISERROR(@mensajeError, 16, 1);
         RETURN;

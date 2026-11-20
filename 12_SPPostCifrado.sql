@@ -14,6 +14,206 @@ GO
 
 
 -- ============================================
+-- seguridad.SP_ConfigurarRolesYPermisos
+-- ============================================
+
+CREATE OR ALTER PROCEDURE seguridad.SP_ConfigurarRolesYPermisos
+WITH EXECUTE AS OWNER
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- ========================================
+    -- 1. CREAR ROLES
+    -- ========================================
+
+    IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = 'rol_Administrador')
+        EXEC('CREATE ROLE rol_Administrador');
+
+    IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = 'rol_CargadorResultados')
+        EXEC('CREATE ROLE rol_CargadorResultados');
+
+    IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = 'rol_GestorPublicidad')
+        EXEC('CREATE ROLE rol_GestorPublicidad');
+
+    IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = 'rol_Consulta')
+        EXEC('CREATE ROLE rol_Consulta');
+
+
+    -- ========================================
+    -- 2. PERMISOS DEL ADMINISTRADOR
+    -- ========================================
+
+    GRANT EXECUTE ON SCHEMA::torneo
+    TO rol_Administrador;
+
+    GRANT EXECUTE ON SCHEMA::reglamento
+    TO rol_Administrador;
+
+    GRANT EXECUTE ON SCHEMA::publicidad
+    TO rol_Administrador;
+
+
+    -- ========================================
+    -- 3. PERMISOS DEL GESTOR DE PUBLICIDAD
+    -- ========================================
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Alta_Anunciante
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Modificacion_Anunciante
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Baja_Anunciante
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Alta_Campaña
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Modificacion_Campaña
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Baja_Campaña
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Alta_Exhibicion
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Modificacion_Exhibicion
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Baja_Exhibicion
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Alta_PiezaPublicitaria
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Modificacion_PiezaPublicitaria
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Baja_PiezaPublicitaria
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Alta_InteresPublicitario
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Modificacion_InteresPublicitario
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Baja_InteresPublicitario
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Alta_CuentaConExhibicion
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Baja_CuentaConExhibicion
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_AsignarCuatroPiezasPorPartido
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Reporte_MatrizPrimeTime
+    TO rol_GestorPublicidad;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Reporte_OcupacionPublicitaria_XML
+    TO rol_GestorPublicidad;
+
+
+    -- ========================================
+    -- 4. PERMISOS DEL CONSULTOR
+    -- ========================================
+
+    GRANT EXECUTE ON OBJECT::torneo.SP_Reporte_Goleadores
+    TO rol_Consulta;
+
+    GRANT EXECUTE ON OBJECT::torneo.SP_Reporte_ResultadosEncuentros
+    TO rol_Consulta;
+
+    GRANT EXECUTE ON OBJECT::torneo.SP_Reporte_SeleccionesYPlantillas_XML
+    TO rol_Consulta;
+
+    GRANT EXECUTE ON OBJECT::reglamento.SP_Reporte_DesignacionesArbitrales
+    TO rol_Consulta;
+
+    GRANT EXECUTE ON OBJECT::reglamento.SP_Reporte_Tarjetas_Y_Suspensiones
+    TO rol_Consulta;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Reporte_MatrizPrimeTime
+    TO rol_Consulta;
+
+    GRANT EXECUTE ON OBJECT::publicidad.SP_Reporte_OcupacionPublicitaria_XML
+    TO rol_Consulta;
+
+
+    -- ========================================
+    -- 5. PERMISOS DEL CARGADOR
+    -- ========================================
+
+    GRANT EXECUTE ON OBJECT::torneo.SP_RegistrarGol_Y_ActualizarResultado
+    TO rol_CargadorResultados;
+
+    GRANT EXECUTE ON OBJECT::reglamento.SP_ProcesarTarjeta_Y_Suspension
+    TO rol_CargadorResultados;
+
+    PRINT 'Roles y permisos configurados correctamente.';
+
+END;
+GO
+
+
+
+-- ============================================
+-- seguridad.SP_AsignarUsuarioRol
+-- ============================================
+CREATE OR ALTER PROCEDURE seguridad.SP_AsignarUsuarioRol
+    @Usuario SYSNAME,
+    @Rol SYSNAME
+WITH EXECUTE AS OWNER
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @Usuario AND type IN ('S', 'U'))
+    BEGIN
+        THROW 50001, 'El usuario indicado no existe.', 1;
+    END;
+
+    IF @Rol NOT IN ('rol_Administrador', 'rol_CargadorResultados', 'rol_GestorPublicidad', 'rol_Consulta')
+    BEGIN
+        THROW 50002, 'El rol indicado no esta permitido.', 1;
+    END;
+
+    IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @Rol AND type = 'R')
+    BEGIN
+        THROW 50003, 'El rol indicado no existe.', 1;
+    END;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM sys.database_role_members RM
+        INNER JOIN sys.database_principals R
+            ON RM.role_principal_id = R.principal_id
+        INNER JOIN sys.database_principals U
+            ON RM.member_principal_id = U.principal_id
+        WHERE R.name = @Rol
+          AND U.name = @Usuario
+    )
+    BEGIN
+        DECLARE @SQL NVARCHAR(MAX);
+
+        SET @SQL = N'ALTER ROLE ' + QUOTENAME(@Rol) + N' ADD MEMBER ' + QUOTENAME(@Usuario) + N';';
+
+        EXEC sp_executesql @SQL;
+    END;
+
+    PRINT 'Usuario asignado correctamente al rol.';
+
+END;
+GO
+
+
+
+-- ============================================
 -- MODIFICACION DE STORE PROCEDURES POST CIFRADO
 -- ============================================
 CREATE OR ALTER PROCEDURE torneo.SP_Alta_Persona

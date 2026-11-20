@@ -40,3 +40,9 @@ BEGIN
 	EXEC('CREATE SCHEMA reglamento')
 END
 GO
+
+IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'seguridad')
+BEGIN
+	EXEC('CREATE SCHEMA seguridad')
+END
+GO
