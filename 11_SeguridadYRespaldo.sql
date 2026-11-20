@@ -364,6 +364,27 @@ GO
 
 
 
+-- ============================================
+-- PERMISOS ASIGNADOS A CADA ROL
+-- ============================================
+SELECT
+    DP.name AS Rol, P.permission_name AS Permiso, P.state_desc AS EstadoPermiso,
+    CASE
+        WHEN P.class_desc = 'SCHEMA'
+            THEN SCHEMA_NAME(P.major_id)
+        WHEN P.class_desc = 'OBJECT_OR_COLUMN'
+            THEN OBJECT_SCHEMA_NAME(P.major_id) + '.' +
+                 OBJECT_NAME(P.major_id)
+        ELSE P.class_desc
+    END AS Objeto
+FROM sys.database_permissions P
+INNER JOIN sys.database_principals DP
+    ON P.grantee_principal_id = DP.principal_id
+WHERE DP.name IN ('rol_Administrador', 'rol_CargadorResultados', 'rol_GestorPublicidad', 'rol_Consulta')
+ORDER BY DP.name, P.class_desc, Objeto;
+GO
+
+
 
 -- =====================================================
 -- CREAR USUARIOS DE PRUEBA
