@@ -6,8 +6,9 @@
 -- Gomez, Erin Agustina
 -- Pereyra Almanza, Ignacio Raul
 -- Meynet, Mauro Fernando
+-- Fecha de entrega: 20/11/2026
 
--- Objetivo: Stored Procedures de Reportes
+-- Objetivo: implementacion de mecanismos de seguridad y proteccion de datos
 
 USE DB_Mundial_2026;
 GO
@@ -112,7 +113,7 @@ BEGIN TRY
 
             OR CONVERT(DATE, CONVERT(VARCHAR(10), DecryptByKey(FechaNacimiento_Cifrada, 1, CONVERT(VARBINARY(4), PersonaID))), 23) <> FechaNacimiento
     )
-    BEGIN
+    BEGIN;
         THROW 50001,
             'Error: la validacion del cifrado de Persona fallo.',
             1;
@@ -185,6 +186,7 @@ GO
 -- Tabla despues de eliminar los campos con los datos crudos y se modifican los campos cifrados
 SELECT *
 FROM torneo.Persona;
+GO
 
 -- Muestro los datos descifrados
 CREATE OR ALTER VIEW torneo.VW_Persona_Descifrada

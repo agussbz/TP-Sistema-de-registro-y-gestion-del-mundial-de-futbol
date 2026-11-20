@@ -6,8 +6,9 @@
 -- Gomez, Erin Agustina
 -- Pereyra Almanza, Ignacio Raul
 -- Meynet, Mauro Fernando
+-- Fecha de entrega: 20/11/2026
 
--- Objetivo: Stored Procedures de Reportes
+-- Objetivo: configuracion de roles, permisos y control de acceso
 
 USE DB_Mundial_2026;
 GO
@@ -174,17 +175,17 @@ BEGIN
     SET NOCOUNT ON;
 
     IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @Usuario AND type IN ('S', 'U'))
-    BEGIN
+    BEGIN;
         THROW 50001, 'El usuario indicado no existe.', 1;
     END;
 
     IF @Rol NOT IN ('rol_Administrador', 'rol_CargadorResultados', 'rol_GestorPublicidad', 'rol_Consulta')
-    BEGIN
+    BEGIN;
         THROW 50002, 'El rol indicado no esta permitido.', 1;
     END;
 
     IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @Rol AND type = 'R')
-    BEGIN
+    BEGIN;
         THROW 50003, 'El rol indicado no existe.', 1;
     END;
 

@@ -6,6 +6,7 @@
 -- Gomez, Erin Agustina
 -- Pereyra Almanza, Ignacio Raul
 -- Meynet, Mauro Fernando
+-- Fecha de entrega: 20/11/2026
 
 -- Objetivo: Stored Procedures de Reportes
 
