@@ -57,13 +57,18 @@ GO
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE 
 TABLE_SCHEMA = 'torneo' AND TABLE_NAME = 'Seleccion')
 BEGIN
-	CREATE TABLE torneo.Seleccion (
-	SeleccionID INT identity(1,1) NOT NULL,
-	Pais VARCHAR(50) NOT NULL,
-	Confederacion VARCHAR(50) NOT NULL,
+    CREATE TABLE torneo.Seleccion (
+        SeleccionID INT IDENTITY(1,1) NOT NULL,
+        Pais VARCHAR(50) NOT NULL,
+        Confederacion VARCHAR(50) NOT NULL,
+        Grupo CHAR(1) NULL,
 
-	constraint pk_Seleccion primary key clustered (SeleccionID)
-	)
+        CONSTRAINT pk_Seleccion PRIMARY KEY CLUSTERED (SeleccionID),
+        CONSTRAINT CK_Seleccion_Grupo CHECK (
+            Grupo IN ('A','B','C','D','E','F',
+                      'G','H','I','J','K','L')
+        )
+    )
 END
 GO
 
