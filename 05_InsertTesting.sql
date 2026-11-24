@@ -663,9 +663,9 @@ SELECT * FROM torneo.Partido
  
 PRINT 'PRUEBAS DE ALTA'
  
--- EXITO
-EXEC torneo.SP_Alta_Partido @SedeID = 1, @Fase = 'Fase de Grupos', @Asistencia = 80000, @ResultadoFinal = '2-1', @FechaHoraLocal = '2026-06-11 15:00', @FechaHoraUTC = '2026-06-11 21:00';
-EXEC torneo.SP_Alta_Partido @SedeID = 1, @Fase = 'Fase de Grupos', @Asistencia = 75000, @ResultadoFinal = '0-0', @FechaHoraLocal = '2026-06-13 18:00', @FechaHoraUTC = '2026-06-13 22:00';
+-- EXITO (COMENTADOS PARA LA CORRECTA PRESENTACION DE LOS GRUPOS)
+--EXEC torneo.SP_Alta_Partido @SedeID = 1, @Fase = 'Fase de Grupos', @Asistencia = 80000, @ResultadoFinal = '2-1', @FechaHoraLocal = '2026-06-11 15:00', @FechaHoraUTC = '2026-06-11 21:00';
+--EXEC torneo.SP_Alta_Partido @SedeID = 1, @Fase = 'Fase de Grupos', @Asistencia = 75000, @ResultadoFinal = '0-0', @FechaHoraLocal = '2026-06-13 18:00', @FechaHoraUTC = '2026-06-13 22:00';
  
 -- EXITO para modificar y eliminar
 EXEC torneo.SP_Alta_Partido @SedeID = 1, @Fase = 'Fase De Prueba', @Asistencia = 1000, @ResultadoFinal = '1-1', @FechaHoraLocal = '2026-06-20 12:00', @FechaHoraUTC = '2026-06-20 18:00';
