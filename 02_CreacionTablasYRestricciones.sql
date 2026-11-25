@@ -17,20 +17,22 @@ go
 --  Tablas del esquema TORNEO
 --==============================
 
---Tabla SEDE
+-- Tabla SEDE
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE 
 TABLE_SCHEMA = 'torneo' AND TABLE_NAME = 'Sede')
 BEGIN
-	CREATE TABLE torneo.Sede (
-	SedeID INT identity(1,1) NOT NULL,
-	NombreEstadio VARCHAR(70) NOT NULL,
-	Ciudad VARCHAR(100) NOT NULL,
-	Pais VARCHAR(50),
-	Capacidad INT NOT NULL check (Capacidad>0),
-	HusoHorario VARCHAR(50) NOT NULL,
+    CREATE TABLE torneo.Sede (
+        SedeID INT IDENTITY(1,1) NOT NULL,
+        NombreEstadio VARCHAR(70) NOT NULL,
+        Ciudad VARCHAR(100) NOT NULL,
+        Pais VARCHAR(50),
+        Capacidad INT NOT NULL CHECK (Capacidad > 0),
+        HusoHorario VARCHAR(50) NOT NULL,
+        Latitud DECIMAL(9,6) NULL,
+        Longitud DECIMAL(9,6) NULL,
 
-	constraint pk_Sede primary key clustered (SedeID)
-	)
+        CONSTRAINT pk_Sede PRIMARY KEY CLUSTERED (SedeID)
+    )
 END
 GO
 
