@@ -580,17 +580,19 @@ PRINT 'PRUEBAS DE ALTA'
 
 --EXITO
 
-EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio Azteca', @Ciudad = 'Ciudad de Mexico', @Pais = 'México', @Capacidad = 83264, @HusoHorario = 'UTC-6';
-EXEC torneo.SP_Alta_Sede @NombreEstadio = 'MetLife Stadium', @Ciudad = 'Nueva York', @Pais = 'Estados Unidos', @Capacidad = 82500, @HusoHorario = 'UTC-4';
+EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio Azteca', @Ciudad = 'Ciudad de Mexico', @Pais = 'México', @Capacidad = 83264, @HusoHorario = 'UTC-6', @Latitud = 19.302900, @Longitud = -99.150500;
+EXEC torneo.SP_Alta_Sede @NombreEstadio = 'MetLife Stadium', @Ciudad = 'Nueva York', @Pais = 'Estados Unidos', @Capacidad = 82500, @HusoHorario = 'UTC-4', @Latitud = 40.813500, @Longitud = -74.074500;
 
 -- EXITO para modificar y eliminar
-EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio De Prueba', @Ciudad = 'Ciudad Prueba', @Pais = 'Pais Prueba', @Capacidad = 50000, @HusoHorario = 'UTC-0';
+
+EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio De Prueba', @Ciudad = 'Ciudad Prueba', @Pais = 'Pais Prueba', @Capacidad = 50000, @HusoHorario = 'UTC-0', @Latitud = 40.000000, @Longitud = -75.000000;
 
 -- FRACASO
-EXEC torneo.SP_Alta_Sede @NombreEstadio = '', @Ciudad = 'Los Angeles', @Pais = 'Estados Unidos', @Capacidad = 70000, @HusoHorario = 'UTC-8';
-EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Rose Bowl', @Ciudad = 'Los Angeles', @Pais = 'Estados Unidos', @Capacidad = 0, @HusoHorario = 'UTC-8';
-EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio Azteca', @Ciudad = 'Ciudad de Mexico', @Pais = 'Mexico', @Capacidad = 83264, @HusoHorario = 'UTC-6';
-EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio Azteca', @Ciudad = 'Ciudad de Mexico', @Pais = 'Mexico', @Capacidad = 0, @HusoHorario = 'UTC-8';
+EXEC torneo.SP_Alta_Sede @NombreEstadio = '', @Ciudad = 'Los Angeles', @Pais = 'Estados Unidos', @Capacidad = 70000, @HusoHorario = 'UTC-8', @Latitud = 45, @Longitud = -75;
+EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Rose Bowl', @Ciudad = 'Los Angeles', @Pais = 'Estados Unidos', @Capacidad = 0, @HusoHorario = 'UTC-8', @Latitud = 38, @Longitud = -98;
+EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio Azteca', @Ciudad = 'Ciudad de Mexico', @Pais = 'Mexico', @Capacidad = 83264, @HusoHorario = 'UTC-6', @Latitud = 67, @Longitud = 75;
+EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio Azteca', @Ciudad = 'Ciudad de Mexico', @Pais = 'Mexico', @Capacidad = 0, @HusoHorario = 'UTC-8', @Latitud = 51, @Longitud = -5;
+EXEC torneo.SP_Alta_Sede @NombreEstadio = 'Estadio Prueba Latitud', @Ciudad = 'Ciudad Prueba', @Pais = 'Pais Prueba', @Capacidad = 50000, @HusoHorario = 'UTC-0', @Latitud = 95, @Longitud = -75;
 
 SELECT * FROM torneo.Sede
 
@@ -605,7 +607,9 @@ EXEC torneo.SP_Modificacion_Sede
     @Ciudad = 'Ciudad Modificada',
     @Pais = 'Pais Modificado',
     @Capacidad = 60000,
-    @HusoHorario = 'UTC-1';
+    @HusoHorario = 'UTC-1',
+    @Latitud = 45.000000,
+    @Longitud = -80.000000;
 
 -- FRACASO
 EXEC torneo.SP_Modificacion_Sede 
@@ -639,6 +643,26 @@ EXEC torneo.SP_Modificacion_Sede
     @Pais = 'Pais Modificado',
     @Capacidad = -100,
     @HusoHorario = 'UTC-1';
+
+EXEC torneo.SP_Modificacion_Sede 
+    @SedeID = @ID_Sede_Prueba, 
+    @NombreEstadio = 'Estadio de Prueba Modificado',
+    @Ciudad = 'Ciudad Modificada',
+    @Pais = 'Pais Modificado',
+    @Capacidad = 60000,
+    @HusoHorario = 'UTC-1',
+    @Latitud = -95,
+    @Longitud = -80;
+
+EXEC torneo.SP_Modificacion_Sede 
+    @SedeID = @ID_Sede_Prueba, 
+    @NombreEstadio = 'Estadio de Prueba Modificado',
+    @Ciudad = 'Ciudad Modificada',
+    @Pais = 'Pais Modificado',
+    @Capacidad = 60000,
+    @HusoHorario = 'UTC-1',
+    @Latitud = 45,
+    @Longitud = 190;
 
 SELECT * FROM torneo.Sede
 
