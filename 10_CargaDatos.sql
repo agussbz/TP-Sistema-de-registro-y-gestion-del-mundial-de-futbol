@@ -145,30 +145,40 @@ CREATE TABLE #SedeSeed (
     Ciudad        VARCHAR(100) COLLATE DATABASE_DEFAULT NOT NULL,
     Pais          VARCHAR(50)  COLLATE DATABASE_DEFAULT NOT NULL,
     Capacidad     INT NOT NULL,
-    Huso          VARCHAR(50)  COLLATE DATABASE_DEFAULT NOT NULL
+    Huso          VARCHAR(50)  COLLATE DATABASE_DEFAULT NOT NULL,
+    Latitud       DECIMAL(9,6) NOT NULL,
+    Longitud      DECIMAL(9,6) NOT NULL
 );
-INSERT INTO #SedeSeed (NombreEstadio, Ciudad, Pais, Capacidad, Huso) VALUES
-    (N'Estadio Azteca', N'Ciudad de Mexico', N'México', 83264, 'UTC-6'),
-    (N'MetLife Stadium', N'Nueva York', N'Estados Unidos', 82500, 'UTC-4'),
-    (N'SoFi Stadium', N'Los Angeles', N'Estados Unidos', 70240, 'UTC-7'),
-    (N'AT&T Stadium', N'Dallas', N'Estados Unidos', 94000, 'UTC-5'),
-    (N'Mercedes-Benz Stadium', N'Atlanta', N'Estados Unidos', 71000, 'UTC-4'),
-    (N'Hard Rock Stadium', N'Miami', N'Estados Unidos', 64767, 'UTC-4'),
-    (N'BMO Field', N'Toronto', N'Canadá', 45000, 'UTC-4'),
-    (N'BC Place', N'Vancouver', N'Canadá', 54500, 'UTC-7'),
-    (N'Estadio BBVA', N'Monterrey', N'México', 53500, 'UTC-6'),
-    (N'Estadio Akron', N'Guadalajara', N'México', 48071, 'UTC-6'),
-    (N'Lumen Field', N'Seattle', N'Estados Unidos', 69000, 'UTC-7'),
-    (N'NRG Stadium', N'Houston', N'Estados Unidos', 72220, 'UTC-5'),
-    (N'Gillette Stadium', N'Foxborough', N'Estados Unidos', 65878, 'UTC-4'),
-    (N'Lincoln Financial Field', N'Filadelfia', N'Estados Unidos', 67594, 'UTC-4'),
-    (N'Arrowhead Stadium', N'Kansas City', N'Estados Unidos', 76416, 'UTC-5'),
-    (N'Levi''s Stadium', N'Santa Clara', N'Estados Unidos', 68500, 'UTC-7');
+INSERT INTO #SedeSeed (NombreEstadio, Ciudad, Pais, Capacidad, Huso, Latitud, Longitud) VALUES
+    (N'Estadio Azteca', N'Ciudad de Mexico', N'México', 83264, 'UTC-6', 19.302837, -99.150803),
+    (N'MetLife Stadium', N'Nueva York', N'Estados Unidos', 82500, 'UTC-4', 40.813477, -74.074951),
+    (N'SoFi Stadium', N'Los Angeles', N'Estados Unidos', 70240, 'UTC-7', 33.953438, -118.339447),
+    (N'AT&T Stadium', N'Dallas', N'Estados Unidos', 94000, 'UTC-5', 32.748138, -97.093231),
+    (N'Mercedes-Benz Stadium', N'Atlanta', N'Estados Unidos', 71000, 'UTC-4', 33.755371, -84.401436),
+    (N'Hard Rock Stadium', N'Miami', N'Estados Unidos', 64767, 'UTC-4', 25.957830, -80.239326),
+    (N'BMO Field', N'Toronto', N'Canadá', 45000, 'UTC-4', 43.633087, -79.418961),
+    (N'BC Place', N'Vancouver', N'Canadá', 54500, 'UTC-7', 49.276646, -123.112564),
+    (N'Estadio BBVA', N'Monterrey', N'México', 53500, 'UTC-6', 25.669132, -100.244621),
+    (N'Estadio Akron', N'Guadalajara', N'México', 48071, 'UTC-6', 20.681721, -103.463135),
+    (N'Lumen Field', N'Seattle', N'Estados Unidos', 69000, 'UTC-7', 47.595135, -122.331917),
+    (N'NRG Stadium', N'Houston', N'Estados Unidos', 72220, 'UTC-5', 29.684702, -95.410965),
+    (N'Gillette Stadium', N'Foxborough', N'Estados Unidos', 65878, 'UTC-4', 42.090790, -71.264404),
+    (N'Lincoln Financial Field', N'Filadelfia', N'Estados Unidos', 67594, 'UTC-4', 39.901325, -75.167862),
+    (N'Arrowhead Stadium', N'Kansas City', N'Estados Unidos', 76416, 'UTC-5', 39.048855, -94.484474),
+    (N'Levi''s Stadium', N'Santa Clara', N'Estados Unidos', 68500, 'UTC-7', 37.403297, -121.969765);
 
-INSERT INTO torneo.Sede (NombreEstadio, Ciudad, Pais, Capacidad, HusoHorario)
-SELECT s.NombreEstadio, s.Ciudad, s.Pais, s.Capacidad, s.Huso
+INSERT INTO torneo.Sede (NombreEstadio, Ciudad, Pais, Capacidad, HusoHorario, Latitud, Longitud)
+SELECT s.NombreEstadio, s.Ciudad, s.Pais, s.Capacidad, s.Huso, s.Latitud, s.Longitud
 FROM #SedeSeed s
 WHERE NOT EXISTS (SELECT 1 FROM torneo.Sede x WHERE x.NombreEstadio = s.NombreEstadio);
+
+-- Actualizar coordenadas de las sedes existentes
+UPDATE x
+SET x.Latitud = s.Latitud,
+    x.Longitud = s.Longitud
+FROM torneo.Sede x
+INNER JOIN #SedeSeed s
+    ON x.NombreEstadio = s.NombreEstadio;
 
 CREATE TABLE #Equipo (
     Idx            INT NOT NULL PRIMARY KEY,
