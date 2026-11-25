@@ -60,7 +60,7 @@ BEGIN
         SUM(CASE WHEN t.Tipo LIKE '%Amarilla%' THEN 1 ELSE 0 END) AS CantidadAmarillas,
         SUM(CASE WHEN t.Tipo LIKE '%Roja%' THEN 1 ELSE 0 END) AS CantidadRojas,
         CASE 
-            WHEN SUM(CASE WHEN t.Tipo LIKE '%Roja%' THEN 1 ELSE 0 END) > 0 THEN ISNULL(MAX(sus.PartidosSuspendido), 1)
+            WHEN SUM(CASE WHEN t.Tipo LIKE '%Roja%' THEN 1 ELSE 0 END) > 0 THEN MAX(ISNULL(sus.PartidosSuspendido, 1))
             WHEN SUM(CASE WHEN t.Tipo LIKE '%Amarilla%' THEN 1 ELSE 0 END) >= 2 THEN 1 -- O el cálculo de partidos por amarillas
             ELSE 0
         END AS PartidosSuspensionActivos,
@@ -303,4 +303,42 @@ EXEC torneo.SP_Reporte_SeleccionesYPlantillas_XML;
 
 PRINT '7. Ejecutando Reporte Ilustrativo de Resultados de Encuentros...';
 EXEC torneo.SP_Reporte_ResultadosEncuentros;
+GO
+
+-- ==========================================
+-- 8. Geolocalizacion de sedes
+-- ==========================================
+
+CREATE OR ALTER PROCEDURE torneo.SP_Reporte_MapaSedes
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        s.SedeID,
+        s.NombreEstadio,
+        s.Ciudad,
+        s.Pais,
+        s.Capacidad,
+        s.Latitud,
+        s.Longitud,
+        COUNT(p.PartidoID) AS CantidadPartidos,
+        ISNULL(SUM(p.Asistencia), 0) AS AsistenciaTotal
+    FROM torneo.Sede s
+    LEFT JOIN torneo.Partido p
+        ON s.SedeID = p.SedeID
+    GROUP BY
+        s.SedeID,
+        s.NombreEstadio,
+        s.Ciudad,
+        s.Pais,
+        s.Capacidad,
+        s.Latitud,
+        s.Longitud
+    ORDER BY s.Pais, s.NombreEstadio;
+END
+GO
+
+PRINT '8. Ejecutando Reporte Sobre Geolocalizacion de Sedes...';
+EXEC torneo.SP_Reporte_MapaSedes;
 GO
