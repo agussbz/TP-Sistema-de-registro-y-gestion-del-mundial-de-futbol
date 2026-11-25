@@ -22,7 +22,9 @@ CREATE OR ALTER PROCEDURE torneo.SP_Alta_Sede
     @Ciudad VARCHAR(100),
     @Pais VARCHAR(50),
     @Capacidad INT,
-    @HusoHorario VARCHAR(50)
+    @HusoHorario VARCHAR(50),
+    @Latitud DECIMAL(9,6) = NULL,
+    @Longitud DECIMAL(9,6) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -34,6 +36,13 @@ BEGIN
         SET @mensajeError =  @mensajeError + 'La capacidad debe ser mayor a cero. ';
     IF EXISTS (SELECT 1 FROM torneo.Sede WHERE NombreEstadio = @NombreEstadio AND Ciudad = @Ciudad)
         SET @mensajeError =  @mensajeError + 'El estadio ya se encuentra registrado en esta ciudad. ';
+    IF @Latitud NOT BETWEEN -90 AND 90
+        SET @mensajeError = @mensajeError + 'La latitud debe estar entre -90 y 90. ';
+    IF @Longitud NOT BETWEEN -180 AND 180
+        SET @mensajeError = @mensajeError + 'La longitud debe estar entre -180 y 180. ';
+    IF (@Latitud IS NULL AND @Longitud IS NOT NULL)
+        OR (@Latitud IS NOT NULL AND @Longitud IS NULL)
+        SET @mensajeError = @mensajeError + 'Se deben proporcionar ambas coordenadas. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -41,8 +50,8 @@ BEGIN
         RETURN;
     END
 
-    INSERT INTO torneo.Sede (NombreEstadio, Ciudad, Pais, Capacidad, HusoHorario)
-    VALUES (@NombreEstadio, @Ciudad, @Pais, @Capacidad, @HusoHorario);
+    INSERT INTO torneo.Sede (NombreEstadio, Ciudad, Pais, Capacidad, HusoHorario, Latitud, Longitud)
+    VALUES (@NombreEstadio, @Ciudad, @Pais, @Capacidad, @HusoHorario, @Latitud, @Longitud);
 
     PRINT 'Sede registrada exitosamente.';
 END
@@ -54,7 +63,9 @@ CREATE OR ALTER PROCEDURE torneo.SP_Modificacion_Sede
     @Ciudad VARCHAR(100),
     @Pais VARCHAR(50),
     @Capacidad INT,
-    @HusoHorario VARCHAR(50)
+    @HusoHorario VARCHAR(50),
+    @Latitud DECIMAL(9,6) = NULL,
+    @Longitud DECIMAL(9,6) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -66,6 +77,13 @@ BEGIN
         SET @mensajeError =  @mensajeError + 'El nombre del estadio es obligatorio. ';
     IF @Capacidad <= 0
         SET @mensajeError =  @mensajeError + 'La capacidad debe ser mayor a cero. ';
+    IF @Latitud NOT BETWEEN -90 AND 90
+        SET @mensajeError = @mensajeError + 'La latitud debe estar entre -90 y 90. ';
+    IF @Longitud NOT BETWEEN -180 AND 180
+        SET @mensajeError = @mensajeError + 'La longitud debe estar entre -180 y 180. ';
+    IF (@Latitud IS NULL AND @Longitud IS NOT NULL)
+        OR (@Latitud IS NOT NULL AND @Longitud IS NULL)
+        SET @mensajeError = @mensajeError + 'Se deben proporcionar ambas coordenadas. ';
 
     IF LEN(@mensajeError) > 0
     BEGIN
@@ -78,7 +96,9 @@ BEGIN
         Ciudad= @Ciudad, 
         Pais= @Pais, 
         Capacidad= @Capacidad, 
-        HusoHorario= @HusoHorario 
+        HusoHorario= @HusoHorario,
+        Latitud = ISNULL(@Latitud, Latitud),
+        Longitud = ISNULL(@Longitud, Longitud)
     WHERE SedeID= @SedeID;
 
     PRINT 'Sede modificada exitosamente. ';
