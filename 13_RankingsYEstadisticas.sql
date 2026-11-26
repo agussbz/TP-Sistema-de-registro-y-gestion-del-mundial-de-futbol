@@ -1,3 +1,4 @@
+
 -- Universidad: Universidad Nacional de La Matanza
 -- Materia: Base de Datos Aplicadas, COM 02
 -- Integrantes Grupo 3:
@@ -24,7 +25,7 @@ BEGIN
     SET NOCOUNT ON;
 
     IF @Top IS NULL OR @Top <= 0
-    BEGIN
+    BEGIN;
         THROW 50001, 'La cantidad debe ser mayor a cero.', 1;
     END;
 
@@ -34,7 +35,7 @@ BEGIN
            FROM torneo.Seleccion
            WHERE Pais = @Seleccion
        )
-    BEGIN
+    BEGIN;
         THROW 50002, 'La seleccion ingresada no existe.', 1;
     END;
 
@@ -99,7 +100,7 @@ BEGIN
     SET NOCOUNT ON;
 
     IF @Top IS NULL OR @Top <= 0
-    BEGIN
+    BEGIN;
         THROW 50001, 'La cantidad debe ser mayor a cero.', 1;
     END;
 
@@ -109,7 +110,7 @@ BEGIN
            FROM torneo.Seleccion
            WHERE Pais = @Seleccion
        )
-    BEGIN
+    BEGIN;
         THROW 50002, 'La seleccion ingresada no existe.', 1;
     END;
 
@@ -175,7 +176,7 @@ BEGIN
     SET NOCOUNT ON;
 
     IF @Top IS NULL OR @Top <= 0
-    BEGIN
+    BEGIN;
         THROW 50001, 'La cantidad debe ser mayor a cero.', 1;
     END;
 
@@ -298,7 +299,7 @@ BEGIN
     IF @Grupo IS NOT NULL
        AND @Grupo NOT IN ('A','B','C','D','E','F',
                           'G','H','I','J','K','L')
-    BEGIN
+    BEGIN;
         THROW 50001, 'El grupo ingresado no es valido.', 1;
     END;
 
@@ -429,7 +430,7 @@ BEGIN
         'Tercer Puesto',
         'Final'
     )
-    BEGIN
+    BEGIN;
         THROW 50001, 'La fase ingresada no es valida.', 1;
     END;
 
@@ -538,7 +539,7 @@ BEGIN
     WHERE Pais = @Seleccion;
 
     IF @SeleccionID IS NULL
-    BEGIN
+    BEGIN;
         THROW 50001, 'La seleccion ingresada no existe.', 1;
     END;
 
